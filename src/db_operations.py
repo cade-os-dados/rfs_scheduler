@@ -21,7 +21,6 @@ class schedulerDatabase:
                 task_name TEXT NOT NULL,
                 scheduled_time DATETIME NOT NULL,
                 status TEXT NOT NULL
-                error_msg TEXT
                 )
                 '''
         execute(db_filename,create_db)
@@ -29,6 +28,6 @@ class schedulerDatabase:
     @staticmethod
     def commit_task(db_filename, task_name, scheduled_time, status):
         insert_db = '''
-        INSERT INTO executed_tasks (task_name, scheduled_time, status, error_msg) VALUES (?, ?, ?, ?)
+        INSERT INTO executed_tasks (task_name, scheduled_time, status) VALUES (?, ?, ?)
         '''
         commit(db_filename, insert_db, (task_name, scheduled_time, status))

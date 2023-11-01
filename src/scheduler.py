@@ -12,7 +12,6 @@ class Scheduler:
 
     def __init__(self,db_filename="scheduler.db"):
         self.tasks = []
-        self.executed_tasks = []
         self.lock = threading.Lock()
         self.db_filename = db_filename
         # Cria a tabela se não existir
