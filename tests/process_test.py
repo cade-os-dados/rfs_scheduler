@@ -11,4 +11,9 @@ scheduler.add_process(["python","tests/integration/hello.py"],
                       datetime.now(), 
                       interval=60)
 
+scheduler.add_process(["python", "tests/integration/memory.py"],
+                      "Memory test",
+                      datetime.now(),
+                      interval=300)
+
 scheduler.run_processes()
