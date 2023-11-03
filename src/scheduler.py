@@ -72,9 +72,9 @@ class Scheduler:
         while self.processes:
             current_time = datetime.now()
             next_process = min(self.processes, key=lambda process: process[2])
-            print('Executando', next_process[1], '...')
-
+            
             if current_time >= next_process[2]:
+                print('Executando', next_process[1], '...')
                 process_args, process_name, scheduled_time, interval = self.processes.pop(self.processes.index(next_process))
                 thread = threading.Thread(target=self.run_process, args=(process_args, process_name, scheduled_time))
                 thread.start()
