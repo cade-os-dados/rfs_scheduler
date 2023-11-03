@@ -4,9 +4,14 @@ import subprocess
 from datetime import datetime, timedelta
 
 # my libs
-from db_operations import schedulerDatabase as sdb
-from time_operations import scheduleOperations as sops
-from utils import check_memory_mb
+try:
+    from db_operations import schedulerDatabase as sdb
+    from time_operations import scheduleOperations as sops
+    from utils import check_memory_mb
+except ModuleNotFoundError:
+    from src.db_operations import schedulerDatabase as sdb
+    from src.time_operations import scheduleOperations as sops
+    from src.utils import check_memory_mb
 
 class Scheduler:
 
