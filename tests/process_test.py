@@ -9,11 +9,11 @@ scheduler = Scheduler()
 scheduler.add_process(["python","tests/integration/hello.py"], 
                       "Hello World!", 
                       datetime.now(), 
-                      interval=60)
+                      interval=0.1)
 
 scheduler.add_process(["python", "tests/integration/memory.py"],
                       "Memory test",
                       datetime.now(),
-                      interval=300)
+                      interval=60)
 
 scheduler.run_processes()

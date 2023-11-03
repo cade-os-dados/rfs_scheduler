@@ -1,13 +1,12 @@
 import time
 import threading
 import subprocess
-
-# 3rd party libs
 from datetime import datetime, timedelta
 
 # my libs
 from db_operations import schedulerDatabase as sdb
 from time_operations import scheduleOperations as sops
+from utils import check_memory_mb
 
 class Scheduler:
 
@@ -44,12 +43,19 @@ class Scheduler:
         self.processes.append((processes_args, process_name, scheduled_time, interval))
 
     def run_process(self, process_args, process_name, scheduled_time):
-        result = subprocess.run(process_args, capture_output=True, text=True)
+        free_memory_mb = check_memory_mb()
+        # insert initial informations
         with self.lock:
-            if len(result.stderr) > 0:
-                sdb.commit_process(self.db_filename, process_name, scheduled_time, 'FAILED', result.stderr)
-            else:
-                sdb.commit_process(self.db_filename, process_name, scheduled_time, 'COMPLETED', None)
+            commit_id = sdb.commit_process(self.db_filename, process_name, scheduled_time, free_memory_mb)
+        # effectively run process
+        result = subprocess.run(process_args, capture_output=True, text=True)
+        # check if subprocess was executed successfully
+        if len(result.stderr) > 0:
+            status = 'FAILED'
+        else:
+            status = 'COMPLETED'
+        with self.lock:
+            sdb.update_commit(self.db_filename, datetime.now(), status, result.stderr, commit_id)
 
     def run(self):
         while self.tasks:
