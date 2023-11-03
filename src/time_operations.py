@@ -41,6 +41,17 @@ class scheduleOperations:
         new_scheduled_time = scheduled_time + interval
         return new_scheduled_time
 
+    @staticmethod
+    def proximo_envio_diario(hour, minute=0):
+        hoje = date.today()
+        proxima_execucao = hoje + relativedelta(days=+1)
+        dt_proxima_execucao = datetime(year = proxima_execucao.year, 
+                                     month = proxima_execucao.month, 
+                                     day = proxima_execucao.day, 
+                                     hour = hour,
+                                     minute=minute)
+        return dt_proxima_execucao
+
 if __name__ == '__main__':
     assert enumTime.hourly.value == 3600
     assert enumTime.daily.value == 86400
