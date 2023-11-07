@@ -1,5 +1,5 @@
 from enum import Enum
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 # 3rd party
 from dateutil.relativedelta import relativedelta
@@ -8,6 +8,12 @@ class time_abrev(Enum):
     DAY = "D"
     WEEK = "W"
     MONTH = "M"
+
+class enumTime(Enum):
+    minute = 60
+    hourly = 60 * minute
+    daily = 24 * hourly
+    weekly = 7 * daily
 
 class scheduleOperations:
 
@@ -34,3 +40,19 @@ class scheduleOperations:
             interval = timedelta(seconds=interval)
         new_scheduled_time = scheduled_time + interval
         return new_scheduled_time
+
+    @staticmethod
+    def proximo_envio_diario(hour, minute=0):
+        hoje = date.today()
+        proxima_execucao = hoje + relativedelta(days=+1)
+        dt_proxima_execucao = datetime(year = proxima_execucao.year, 
+                                     month = proxima_execucao.month, 
+                                     day = proxima_execucao.day, 
+                                     hour = hour,
+                                     minute=minute)
+        return dt_proxima_execucao
+
+if __name__ == '__main__':
+    assert enumTime.hourly.value == 3600
+    assert enumTime.daily.value == 86400
+    assert enumTime.weekly.value == 604800

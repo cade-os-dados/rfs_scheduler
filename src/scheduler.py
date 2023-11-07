@@ -4,9 +4,14 @@ import subprocess
 from datetime import datetime, timedelta
 
 # my libs
-from db_operations import schedulerDatabase as sdb
-from time_operations import scheduleOperations as sops
-from utils import check_memory_mb
+try:
+    from db_operations import schedulerDatabase as sdb
+    from time_operations import scheduleOperations as sops
+    from utils import check_memory_mb
+except ModuleNotFoundError:
+    from src.db_operations import schedulerDatabase as sdb
+    from src.time_operations import scheduleOperations as sops
+    from src.utils import check_memory_mb
 
 class Scheduler:
 
@@ -35,9 +40,14 @@ class Scheduler:
             except:
                 sdb.commit_task(self.db_filename, task_name, scheduled_time, 'FAILED')
     
-    def add_process(self, processes_args, process_name, scheduled_time=None, weekday=None, hour=0, minute=0, second=0, interval=None):
-        if (scheduled_time is None) and (weekday is None):
-            scheduled_time = datetime.now()
+    def add_process(self, processes_args=None, process_name=None, scheduled_time=None, weekday=None, hour=0, minute=0, second=0, interval=None, pyprocess=None):
+        if pyprocess is not None:
+            processes_args = [pyprocess.python_path, pyprocess.script_path]
+            process_name = pyprocess.process_name
+            scheduled_time = pyprocess.scheduled_time
+            interval = pyprocess.interval
+        elif (scheduled_time is None) and (weekday is None):
+                scheduled_time = datetime.now()
         elif weekday is not None:
             scheduled_time = sops.next_weekday(weekday, hour, minute, second)
         self.processes.append((processes_args, process_name, scheduled_time, interval))
