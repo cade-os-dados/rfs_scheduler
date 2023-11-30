@@ -15,6 +15,15 @@ class enumTime(Enum):
     daily = 24 * hourly
     weekly = 7 * daily
 
+class enumWeek(Enum):
+    segunda = 0
+    terca = 1
+    quarta = 2
+    quinta = 3
+    sexta = 4
+    sabado = 5
+    domingo = 6
+
 class scheduleOperations:
 
     @staticmethod
