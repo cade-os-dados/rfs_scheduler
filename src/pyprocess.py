@@ -11,7 +11,7 @@ class projectPaths:
         self.python_path = python_path
         if python_path is None:
             self.python_path = os.path.join(project_path, self.PY_VENV_PATH)
-
+    
 class pyProcess:
 
     def __init__(self, process_name, scheduled_time, interval=None, python_path=None, script_path=None, paths: projectPaths = None):
@@ -25,28 +25,12 @@ class pyProcess:
         self.interval = interval
 
 if __name__ == "__main__":
-    proj_paths = projectPaths(
-        project_path = 'c:/ola/olamundo', 
-        script_name = 'script.py'
-    )
-    teste = pyProcess(
-        paths = proj_paths, 
-        process_name = "teste", 
-        scheduled_time=None, 
-        interval=None
-    )
+    proj_paths = projectPaths(project_path = 'c:/ola/olamundo', script_name = 'script.py')
+    teste = pyProcess(paths = proj_paths, process_name = "teste", scheduled_time=None, interval=None)
     assert teste.python_path == os.path.join(proj_paths.project_path, proj_paths.PY_VENV_PATH)
     assert teste.script_path == os.path.join(proj_paths.project_path, proj_paths.script_name)
 
-    proj_paths = projectPaths(
-        project_path = 'c:/ola/olamundo', 
-        script_name = 'hello/script.py'
-    )
-    teste = pyProcess(
-        paths = proj_paths, 
-        process_name = "teste", 
-        scheduled_time=None, 
-        interval=None
-    )
+    proj_paths = projectPaths(project_path = 'c:/ola/olamundo', script_name = 'hello/script.py')
+    teste = pyProcess(paths = proj_paths, process_name = "teste", scheduled_time=None, interval=None)
     assert teste.python_path == os.path.join(proj_paths.project_path, proj_paths.PY_VENV_PATH)
-    assert teste.script_path == os.path.join(proj_paths.project_path, 'hello', 'script.py')    
+    assert teste.script_path == os.path.join(proj_paths.project_path, 'hello', 'script.py')
