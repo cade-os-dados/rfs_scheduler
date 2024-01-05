@@ -42,7 +42,7 @@ class Scheduler:
     
     def add_process(self, processes_args=None, process_name=None, scheduled_time=None, weekday=None, hour=0, minute=0, second=0, interval=None, pyprocess=None):
         if pyprocess is not None:
-            processes_args = [pyprocess.python_path, pyprocess.script_path]
+            processes_args = pyprocess.processes_args
             process_name = pyprocess.process_name
             scheduled_time = pyprocess.scheduled_time
             interval = pyprocess.interval
