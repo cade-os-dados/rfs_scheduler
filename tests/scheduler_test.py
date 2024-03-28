@@ -40,7 +40,7 @@ class TestScheduler(unittest.TestCase):
         self.assertEqual(
             self.scheduler.processes[0],
             (
-                ['local\\venv\\Scripts\\python.exe', 'local\\main.py'], 
+                ['local/venv/Scripts/python.exe', 'local/main.py'], 
                 "hello", 
                 datetime(2022,1,1), 
                 None
@@ -60,7 +60,7 @@ class TestScheduler(unittest.TestCase):
         self.assertEqual(
             self.scheduler.processes[1],
             (
-                ['local\\venv\\Scripts\\python.exe', 'local\\main.py', '--hello', '--world'], 
+                ['local/venv/Scripts/python.exe', 'local/main.py', '--hello', '--world'], 
                 "hello", 
                 datetime(2022,1,1), 
                 None

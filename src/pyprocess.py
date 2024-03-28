@@ -3,7 +3,7 @@ import re
 
 class projectPaths:
 
-    PY_VENV_PATH = 'venv\Scripts\python.exe'
+    PY_VENV_PATH = 'venv/Scripts/python.exe'
 
     def __init__(self, project_path, script_name, python_path=None, args=None):
         self.project_path = project_path

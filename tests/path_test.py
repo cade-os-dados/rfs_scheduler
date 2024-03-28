@@ -31,7 +31,7 @@ class pathTest(unittest.TestCase):
         processo = pyProcess(process_name='ola', scheduled_time=datetime.now(), paths = teste)
         self.assertEqual(
             processo.processes_args, 
-            ['hello\\venv\\Scripts\\python.exe', 'hello\\world.py', '--br', '--translate'], 
+            ['hello/venv/Scripts/python.exe', 'hello/world.py', '--br', '--translate'], 
             "A api que unifica os argumentos do path do python, script e argumentos adicionais não está funcionando corretamente"
         )
 
@@ -40,7 +40,7 @@ class pathTest(unittest.TestCase):
         processo = pyProcess(process_name='ola', scheduled_time=datetime.now(), paths = teste)
         self.assertEqual(
             processo.processes_args, 
-            ['hello\\venv\\Scripts\\python.exe', 'hello\\world.py', '--br', '--translate'], 
+            ['hello/venv/Scripts/python.exe', 'hello/world.py', '--br', '--translate'], 
             "A api que unifica os argumentos do path do python, script e argumentos adicionais não está funcionando corretamente"
         )
 
@@ -48,7 +48,7 @@ class pathTest(unittest.TestCase):
         processo = pyProcess(process_name='ola', scheduled_time=datetime.now(), paths = teste)
         self.assertEqual(
             processo.processes_args, 
-            ['hello\\venv\\Scripts\\python.exe', 'hello\\world.py'], 
+            ['hello/venv/Scripts/python.exe', 'hello/world.py'], 
             "A api que unifica os argumentos do path do python, script e argumentos adicionais não está funcionando corretamente"
         )
     
