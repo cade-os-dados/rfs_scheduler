@@ -1,11 +1,10 @@
 # use the command bellow in the root of project
 # python -m unittest discover . -p "*_test.py"
 
+# built-in
 import os, sys, unittest
-sys.path.append(os.path.abspath('./src'))
-
-# 3rd party libs
 from datetime import datetime
+sys.path.append(os.path.abspath('./src'))
 
 # my libs
 from timeops import scheduleOperations as sops

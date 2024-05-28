@@ -13,6 +13,8 @@ except:
     from src.timeops import scheduleOperations as sops
     from src.utils import check_memory_mb
 
+
+
 class Scheduler:
 
     def __init__(self,db_filename="scheduler.db"):
@@ -25,6 +27,12 @@ class Scheduler:
         sdb.create_database(self.db_filename)
         sdb.create_process_database(self.db_filename)
 
+    def __check_status__(self, output):
+        if len(output.stderr) > 0:
+            return 'FAILED'
+        else:
+            return 'COMPLETED'
+
     def add_process(self, processes_args=None, process_name=None, scheduled_time=None, weekday=None, hour=0, minute=0, second=0, interval=None, pyprocess=None):
         if pyprocess is not None:
             processes_args = pyprocess.processes_args
@@ -36,12 +44,6 @@ class Scheduler:
         elif weekday is not None:
             scheduled_time = sops.next_weekday(weekday, hour, minute, second)
         self.processes.append((processes_args, process_name, scheduled_time, interval))
-
-    def __check_status__(self, output):
-        if len(output.stderr) > 0:
-            return 'FAILED'
-        else:
-            return 'COMPLETED'
 
     def run_process(self, process_args, process_name, scheduled_time):
         free_memory_mb = check_memory_mb()

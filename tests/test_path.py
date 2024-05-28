@@ -20,7 +20,7 @@ class TestPath(unittest.TestCase):
         )
         with open(teste.script_path) as arquivo:
             hello = arquivo.read()
-        self.assertEqual(hello,'ola mundo')
+        assert hello == 'ola mundo'
 
     def test_args_api(self):
         teste = projectPaths(
