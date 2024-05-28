@@ -1,14 +1,13 @@
 # use the command bellow in the root of project
 # python -m unittest discover . -p "*_test.py"
 
+# built-in
 import os, sys, unittest
+from datetime import datetime
 sys.path.append(os.path.abspath('./src'))
 
-# 3rd party libs
-from datetime import datetime
-
 # my libs
-from time_operations import scheduleOperations as sops
+from timeops import scheduleOperations as sops
 
 def print_hello():
     print("Hello, world!")
