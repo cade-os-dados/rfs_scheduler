@@ -3,6 +3,11 @@ import re
 
 DEFAULT_PYTHON_ENV_PATH = 'venv\Scripts\python.exe'
 
+try:
+    from src.projtypes import Process
+except:
+    from src.projtypes import Process
+
 class projectPaths:
 
     def __init__(self, project_path, script_name, python_path=None, args=None):
@@ -41,6 +46,9 @@ class pyProcess:
         for arg in args:
             arg = arg.strip(' ')
             self.processes_args.append(arg)
+
+    def parse(self) -> Process:
+        return Process(self.processes_args, self.process_name, self.scheduled_time, self.interval)
 
 # if __name__ == "__main__":
 #     proj_paths = projectPaths(project_path = 'c:/ola/olamundo', script_name = 'script.py')

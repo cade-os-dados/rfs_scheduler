@@ -7,6 +7,7 @@ sys.path.append(os.path.abspath('./src'))
 from datetime import datetime
 from scheduler import Scheduler
 from pyprocess import pyProcess, projectPaths
+from projtypes import Process
 from unittest.mock import MagicMock, patch
 
 class TestScheduler(unittest.TestCase):
@@ -24,11 +25,11 @@ class TestScheduler(unittest.TestCase):
             ),
             process_name = "hello",
             scheduled_time = datetime(2022,1,1)
-        )
-        self.scheduler.add_process(pyprocess=processo)
+        ).parse()
+        self.scheduler.add_process(processo)
         self.assertEqual(
-            self.scheduler.processes[0],
-            (
+            self.scheduler.queue.processes[0],
+            Process(
                 ['local\\venv\\Scripts\\python.exe', 'local\\main.py'], 
                 "hello", 
                 datetime(2022,1,1), 
@@ -44,11 +45,11 @@ class TestScheduler(unittest.TestCase):
             ),
             process_name = "hello",
             scheduled_time = datetime(2022,1,1)
-        )
-        self.scheduler.add_process(pyprocess=processo)
+        ).parse()
+        self.scheduler.add_process(processo)
         self.assertEqual(
-            self.scheduler.processes[1],
-            (
+            self.scheduler.queue.processes[1],
+            Process(
                 ['local\\venv\\Scripts\\python.exe', 'local\\main.py', '--hello', '--world'], 
                 "hello", 
                 datetime(2022,1,1), 
