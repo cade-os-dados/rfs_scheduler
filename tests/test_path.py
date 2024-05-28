@@ -8,7 +8,7 @@ from datetime import datetime
 
 from pyprocess import projectPaths, pyProcess
 
-class pathTest(unittest.TestCase):
+class TestPath(unittest.TestCase):
 
     def test_path(self):
         

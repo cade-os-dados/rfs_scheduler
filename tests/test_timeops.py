@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath('./src'))
 from datetime import datetime
 
 # my libs
-from time_operations import scheduleOperations as sops
+from timeops import scheduleOperations as sops
 
 def print_hello():
     print("Hello, world!")

@@ -1,6 +1,8 @@
 import os
 import re
 
+DEFAULT_PYTHON_ENV_PATH = 'venv\Scripts\python.exe'
+
 class projectPaths:
 
     PY_VENV_PATH = 'venv\Scripts\python.exe'
@@ -35,13 +37,13 @@ class pyProcess:
                 arg = arg.strip(' ')
                 self.processes_args.append(arg)
 
-if __name__ == "__main__":
-    proj_paths = projectPaths(project_path = 'c:/ola/olamundo', script_name = 'script.py')
-    teste = pyProcess(paths = proj_paths, process_name = "teste", scheduled_time=None, interval=None)
-    assert teste.python_path == os.path.join(proj_paths.project_path, proj_paths.PY_VENV_PATH)
-    assert teste.script_path == os.path.join(proj_paths.project_path, proj_paths.script_name)
+# if __name__ == "__main__":
+#     proj_paths = projectPaths(project_path = 'c:/ola/olamundo', script_name = 'script.py')
+#     teste = pyProcess(paths = proj_paths, process_name = "teste", scheduled_time=None, interval=None)
+#     assert teste.python_path == os.path.join(proj_paths.project_path, proj_paths.PY_VENV_PATH)
+#     assert teste.script_path == os.path.join(proj_paths.project_path, proj_paths.script_name)
 
-    proj_paths = projectPaths(project_path = 'c:/ola/olamundo', script_name = 'hello/script.py')
-    teste = pyProcess(paths = proj_paths, process_name = "teste", scheduled_time=None, interval=None)
-    assert teste.python_path == os.path.join(proj_paths.project_path, proj_paths.PY_VENV_PATH)
-    assert teste.script_path == os.path.join(proj_paths.project_path, 'hello', 'script.py')
+#     proj_paths = projectPaths(project_path = 'c:/ola/olamundo', script_name = 'hello/script.py')
+#     teste = pyProcess(paths = proj_paths, process_name = "teste", scheduled_time=None, interval=None)
+#     assert teste.python_path == os.path.join(proj_paths.project_path, proj_paths.PY_VENV_PATH)
+#     assert teste.script_path == os.path.join(proj_paths.project_path, 'hello', 'script.py')
