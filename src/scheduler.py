@@ -1,5 +1,6 @@
 import time
 import threading
+from threading import Event
 import subprocess
 from datetime import datetime, timedelta
 
@@ -57,5 +58,7 @@ class Scheduler:
                 time.sleep(sleep_time)
             thread = threading.Thread(target=self.run_process, args=(process,))
             thread.start()
-            if process.next() is not None:
+            if not process.stop():
+                # thread.join()
+                process = process.next()
                 self.add_process(process)
