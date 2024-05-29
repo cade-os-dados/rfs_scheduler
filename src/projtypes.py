@@ -1,8 +1,29 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
+from threading import Event
 import subprocess
 
 from src.timeops import scheduleOperations as sops
+
+@dataclass
+class ProcessOnce:
+    args: list
+    name: str
+    schedule: datetime
+
+    def __eq__(self, other):
+        eq = 0
+        eq += int(self.args == other.args)
+        eq += int(self.name == other.name)
+        eq += int(self.schedule == other.schedule)
+        eq += int(self.interval == other.interval)
+        return eq == 4
+    
+    def run(self, **kwargs):
+        return subprocess.run(self.args, capture_output=True, text=True, **kwargs)
+
+    def stop(self):
+        return True
 
 @dataclass
 class Process:
@@ -22,13 +43,46 @@ class Process:
     def run(self, **kwargs):
         return subprocess.run(self.args, capture_output=True, text=True, **kwargs)
 
+    def stop(self):
+        return False
+
     def next(self):
-        if self.interval is not None and self.interval > 0:
+        if self.interval > 0:
             new_schedule = self.schedule
             while new_schedule < datetime.now():
                 new_schedule = sops.calculate_next_period(new_schedule, self.interval)
             self.schedule = new_schedule
             return self
+
+class ProcessPipeline:
+
+    def __init__(self, args: list, name: str, event: Event = None, next_pipe = None):
+        self.args = args
+        self.name = name
+        self.event = event
+        self.schedule = datetime.now()
+        self.next_pipe: ProcessPipeline = next_pipe
+    
+    def wait_event(self, timeout=36000):
+        if self.event is None:
+            return None
+        self.event.wait(timeout) # default timeout 10min
+
+    def run(self, **kwargs):
+        self.wait_event(**kwargs)
+        result = subprocess.run(self.args, capture_output=True, text=True, **kwargs)
+        if not self.stop():
+            self.next_pipe.event.set()
+        return result
+    
+    def stop(self) -> bool:
+        return self.next_pipe is None
+
+    def next(self):
+        # self = self.next_pipe
+        # return self
+        self.next_pipe.event = Event()
+        return self.next_pipe
 
 class ProcessQueue:
 
@@ -44,4 +98,3 @@ class ProcessQueue:
     def append(self, process):
         self.processes.append(process)
         self.processes.sort(key=self.__time__)
-
