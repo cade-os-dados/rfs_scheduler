@@ -1,5 +1,5 @@
 # use the command bellow in the root of project
-# python -m unittest discover . -p "*_test.py"
+# python -m unittest discover tests
 
 # built-in
 import os, sys, unittest

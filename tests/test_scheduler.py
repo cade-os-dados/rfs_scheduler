@@ -1,5 +1,5 @@
 # use the command bellow in the root of project
-# python -m unittest discover . -p "*_test.py"
+# python -m unittest discover tests
 
 import os, sys, unittest
 sys.path.append(os.path.abspath('./src'))

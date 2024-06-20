@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from threading import Event
 import subprocess
+import calendar
 
 from src.timeops import scheduleOperations as sops
 
@@ -53,6 +54,21 @@ class Process:
                 new_schedule = sops.calculate_next_period(new_schedule, self.interval)
             self.schedule = new_schedule
             return self
+
+class TwiceMonthProcess(ProcessOnce):
+
+    def __next__(self, date: datetime):
+        'function only to be more testable'
+        if date.day > 15:
+            last_day = calendar.monthrange(date.year, date.month)[1]
+            self.schedule = date.replace(day=last_day)
+        else:
+            self.schedule = date.replace(day=15)
+
+    def next(self):
+        today = datetime.today()
+        self.__next__(today)
+        return self
 
 class ProcessPipeline:
 
