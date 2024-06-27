@@ -1,6 +1,8 @@
-import os
+import os, sys
 
-path = os.path.join(os.path.dirname(__file__), 'number.txt')
+cdir = os.path.dirname(__file__)
+file = sys.argv[1]
+path = os.path.join(cdir, file)
 with open(path, 'r') as reader:
     number = int(reader.read())
 print(number)

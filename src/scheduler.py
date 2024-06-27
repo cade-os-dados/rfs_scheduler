@@ -38,19 +38,24 @@ class Scheduler:
         self.queue.append(process)
 
     def run_process(self, process: Process):
-        print('Executando', process.name, '...')
-        free_memory_mb = check_memory_mb()
-        with self.lock: # insert initial informations
-            commit_id = sdb.commit_process(self.db_filename, process.name, process.schedule, free_memory_mb)
-        # result = subprocess.run(process.args, capture_output=True, text=True) # effectively run process
-        result = process.run()
-        # check if subprocess was executed successfully
-        status = self.__check_status__(result)
-        with self.lock:
-            sdb.update_commit(self.db_filename, datetime.now(), status, result.stderr, commit_id)
+        if not hasattr(process, 'bypass'):
+            print('Executando', process.name, '...')
+            free_memory_mb = check_memory_mb()
+            with self.lock: # insert initial informations
+                commit_id = sdb.commit_process(self.db_filename, process.name, process.schedule, free_memory_mb)
+            # result = subprocess.run(process.args, capture_output=True, text=True) # effectively run process
+            result = process.run()
+            # check if subprocess was executed successfully
+            status = self.__check_status__(result)
+            with self.lock:
+                sdb.update_commit(self.db_filename, datetime.now(), status, result.stderr, commit_id)
+        else:
+            process.run()
 
     def run(self):
+        
         while self.queue.processes:
+            print(threading.active_count())
             current_time = datetime.now()
             process = self.queue.pop(0)
             
@@ -63,3 +68,4 @@ class Scheduler:
                 # thread.join()
                 process = process.next()
                 self.add_process(process)
+        print(threading.active_count())
