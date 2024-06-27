@@ -4,7 +4,10 @@ from threading import Event
 import subprocess
 import calendar
 
-from src.timeops import scheduleOperations as sops
+try:
+    from src.timeops import scheduleOperations as sops
+except:
+    from timeops import scheduleOperations as sops
 
 @dataclass
 class ProcessOnce:
@@ -95,8 +98,6 @@ class ProcessPipeline:
         return self.next_pipe is None
 
     def next(self):
-        # self = self.next_pipe
-        # return self
         self.next_pipe.event = Event()
         return self.next_pipe
 

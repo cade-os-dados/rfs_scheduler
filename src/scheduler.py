@@ -11,9 +11,10 @@ try:
     from src.utils import check_memory_mb
     from src.projtypes import Process, ProcessQueue
 except:
-    from src.db_operations import schedulerDatabase as sdb
-    from src.timeops import scheduleOperations as sops
-    from src.utils import check_memory_mb
+    from db_operations import schedulerDatabase as sdb
+    from timeops import scheduleOperations as sops
+    from utils import check_memory_mb
+    from projtypes import Process, ProcessQueue
 
 class Scheduler:
 
