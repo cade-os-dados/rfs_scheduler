@@ -1,5 +1,15 @@
-# Features a serem implementadas
+# Working on
 
-- [X] Dar o commit no processo como em execução e somente depois que completar, dar o update para COMPLETED ou FAILED
-- [X] Adicionar informações de inicio de execução e termino de execução no banco de dados
-- [X] Adicionar informações de memória do sistema no banco de dados (com psutil)
+## Módulo Pipeline
+
+Vamos modificar a api do Scheduler para ficar o mais agnóstico possível. 
+
+Para isto, temos que desatrelar as funções de database da thread main e jogar a cargo das classes de processo dentro do run.
+
+## Migrate to Poetry
+
+Better to integrate and install
+
+# Further
+
+Deixar as queries do database separadas em um arquivo a parte
