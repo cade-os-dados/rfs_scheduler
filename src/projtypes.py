@@ -30,17 +30,23 @@ class ProcessOnce:
 
 class TwiceMonthProcess(ProcessOnce):
 
+    trunc_hours = {'hour': 0, 'minute': 0, 'second': 0, 'microsecond': 0}
+
+    def stop(self):
+        return False
+
     def __next__(self, date: datetime):
         'function only to be more testable'
-        if date.day > 15:
+        if date.day >= 15:
             last_day = calendar.monthrange(date.year, date.month)[1]
-            self.schedule = date.replace(day=last_day)
-        else:
-            self.schedule = date.replace(day=15)
+            if last_day != date.day:
+                return date.replace(day=last_day, **self.trunc_hours)
+            date = date + timedelta(days=1)
+        return date.replace(day=15, **self.trunc_hours)
 
     def next(self):
-        today = datetime.today()
-        self.__next__(today)
+        next = self.__next__(self.schedule) # calculate next day
+        self.schedule = next # override schedule day
         return self
 
 @dataclass

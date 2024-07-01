@@ -11,10 +11,12 @@ from projtypes import TwiceMonthProcess
 class TestProcess(unittest.TestCase):
 
     def test_twicetype(self):
-        processo = TwiceMonthProcess(['args'], 'teste', datetime.now())
-        processo.__next__(datetime(2022, 1, 1))
-        assert processo.schedule == datetime(2022, 1, 15)
-        processo.__next__(datetime(2022,1,18))
-        assert processo.schedule == datetime(2022,1,31)
-        processo.__next__(datetime(2024,2,16))
-        assert processo.schedule == datetime(2024,2,29)
+        processo = TwiceMonthProcess(['args'], 'teste', datetime(2024, 2, 18))
+        processo = processo.next()
+        assert processo.schedule == datetime(2024, 2, 29)
+        processo = processo.next()
+        assert processo.schedule == datetime(2024, 3, 15)
+        processo = processo.next()
+        assert processo.schedule == datetime(2024, 3, 31)
+        processo = processo.next()
+        assert processo.schedule == datetime(2024, 4, 15)
