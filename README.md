@@ -1,10 +1,11 @@
 # Working on
 
-## Módulo Pipeline
+## Recurrent Processes
 
-Vamos modificar a api do Scheduler para ficar o mais agnóstico possível. 
+Adicionar os processos no banco de dados e fazer o scheduler rodar somente estes processos. Eles devem
+estar em uma tabela separada.
 
-Para isto, temos que desatrelar as funções de database da thread main e jogar a cargo das classes de processo dentro do run.
+Podemos criar uma GUI para alterar os processos também de forma mais correta.
 
 ## Migrate to Poetry
 

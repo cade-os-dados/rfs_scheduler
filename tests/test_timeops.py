@@ -2,12 +2,11 @@
 # python -m unittest discover tests
 
 # built-in
-import os, sys, unittest
+import unittest
 from datetime import datetime
-sys.path.append(os.path.abspath('./src'))
 
 # my libs
-from timeops import scheduleOperations as sops
+from pyagenda3.timeops import scheduleOperations as sops
 
 def print_hello():
     print("Hello, world!")

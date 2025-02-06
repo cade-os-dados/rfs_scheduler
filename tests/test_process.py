@@ -1,12 +1,11 @@
 # use the command bellow in the root of project
 # python -m unittest discover tests
 
-import os, sys, unittest
-sys.path.append(os.path.abspath('./src'))
+import unittest
 
 from datetime import datetime
 
-from projtypes import TwiceMonthProcess
+from pyagenda3.projtypes import TwiceMonthProcess
 
 class TestProcess(unittest.TestCase):
 

@@ -1,13 +1,12 @@
 # use the command bellow in the root of project
 # python -m unittest discover tests
 
-import os, sys, unittest
-sys.path.append(os.path.abspath('./src'))
+import unittest
 
 from datetime import datetime
-from scheduler import Scheduler
-from pyprocess import pyProcess, projectPaths
-from projtypes import Process
+from pyagenda3.scheduler import Scheduler
+from pyagenda3.pyprocess import pyProcess, projectPaths
+from pyagenda3.projtypes import Process
 from unittest.mock import MagicMock, patch
 
 class TestScheduler(unittest.TestCase):

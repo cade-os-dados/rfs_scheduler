@@ -3,10 +3,7 @@ from datetime import datetime, timedelta
 import subprocess
 import calendar
 
-try:
-    from src.timeops import scheduleOperations as sops
-except:
-    from timeops import scheduleOperations as sops
+from pyagenda3.timeops import scheduleOperations as sops
 
 @dataclass
 class ProcessOnce:

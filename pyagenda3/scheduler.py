@@ -1,14 +1,9 @@
 import time
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime
 
-# my libs
-try:
-    from src.dbops import schedulerDatabase
-    from src.projtypes import Process, ProcessQueue
-except:
-    from dbops import schedulerDatabase
-    from projtypes import Process, ProcessQueue
+from pyagenda3.dbops import schedulerDatabase
+from pyagenda3.projtypes import Process, ProcessQueue
 
 class Scheduler:
 

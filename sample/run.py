@@ -1,10 +1,10 @@
-from src.scheduler import Scheduler
-from config.processes import ProcessosScheduler
-
-import os, sys
-sys.path.append(os.path.abspath('./src'))
+from pyagenda3.scheduler import Scheduler
+from processes import ProcessosScheduler
+import os
 
 if __name__ == "__main__":
+    if not os.path.isdir('data'):
+        os.makedirs('data')
     scheduler = Scheduler('data/scheduler.db')
     processos = ProcessosScheduler.list_all()
 

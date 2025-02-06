@@ -1,12 +1,6 @@
-# use the command bellow in the root of project
-# python -m unittest discover tests
-
-import os, sys, unittest
-sys.path.append(os.path.abspath('./src'))
-
+import os, unittest
 from datetime import datetime
-
-from pyprocess import projectPaths, pyProcess
+from pyagenda3.pyprocess import projectPaths, pyProcess
 
 class TestPath(unittest.TestCase):
 

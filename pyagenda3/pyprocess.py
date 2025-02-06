@@ -1,12 +1,8 @@
 import os
 import re
+from pyagenda3.projtypes import Process
 
 DEFAULT_PYTHON_ENV_PATH = 'venv\Scripts\python.exe'
-
-try:
-    from src.projtypes import Process
-except:
-    from src.projtypes import Process
 
 class projectPaths:
 
@@ -49,14 +45,3 @@ class pyProcess:
 
     def parse(self) -> Process:
         return Process(self.processes_args, self.process_name, self.scheduled_time, self.interval)
-
-# if __name__ == "__main__":
-#     proj_paths = projectPaths(project_path = 'c:/ola/olamundo', script_name = 'script.py')
-#     teste = pyProcess(paths = proj_paths, process_name = "teste", scheduled_time=None, interval=None)
-#     assert teste.python_path == os.path.join(proj_paths.project_path, proj_paths.PY_VENV_PATH)
-#     assert teste.script_path == os.path.join(proj_paths.project_path, proj_paths.script_name)
-
-#     proj_paths = projectPaths(project_path = 'c:/ola/olamundo', script_name = 'hello/script.py')
-#     teste = pyProcess(paths = proj_paths, process_name = "teste", scheduled_time=None, interval=None)
-#     assert teste.python_path == os.path.join(proj_paths.project_path, proj_paths.PY_VENV_PATH)
-#     assert teste.script_path == os.path.join(proj_paths.project_path, 'hello', 'script.py')
