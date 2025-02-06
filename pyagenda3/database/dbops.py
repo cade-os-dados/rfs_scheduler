@@ -1,29 +1,8 @@
 import sqlite3
 from threading import Lock
 from psutil import virtual_memory
-
-QUERIES = {
-    "CREATE": '''
-        CREATE TABLE IF NOT EXISTS executed_tasks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        task_name TEXT NOT NULL,
-        scheduled_time DATETIME NOT NULL,
-        status TEXT NOT NULL
-        )
-    ''',
-
-    "CREATE_PROCESS": '''
-        CREATE TABLE IF NOT EXISTS executed_processes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        process_name TEXT NOT NULL,
-        free_memory_mb REAL,
-        scheduled_time DATETIME NOT NULL,
-        finished_time DATETIME,
-        status TEXT NOT NULL,
-        msg_error TEXT
-        )
-    '''
-}
+from pyagenda3.database.handler import SQLFileHandler
+from pyagenda3.utils import relpath
 
 def execute(db_filename, command):
     with sqlite3.connect(db_filename) as conn:
@@ -43,13 +22,17 @@ class schedulerDatabase:
     def __init__(self, filename):
         self.lock = Lock()
         self.filename = filename
+        self.handler = SQLFileHandler(relpath(__file__,'sql'))
 
     def check_memory_mb(self) -> float:
         return round(virtual_memory()[1] / 10**6, 2)
 
     def setup(self):
-        for query in QUERIES.values():
-            with self.lock:
+        # for query in QUERIES.values():
+        #     with self.lock:
+        #         execute(self.filename, query)
+        for query in self.handler.open_all():
+            with self.lock():
                 execute(self.filename, query)
 
     def commit_task(self, task_name, scheduled_time, status):
