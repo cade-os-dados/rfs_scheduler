@@ -1,6 +1,6 @@
 from enum import Enum
 from src.pyprocess import pyProcess, projectPaths
-from src.time_operations import enumTime, enumWeek, scheduleOperations as sops
+from src.timeops import enumTime, enumWeek, scheduleOperations as sops
 
 DIARIO = enumTime.daily.value
 DUAS_VEZES_POR_DIA = DIARIO / 2

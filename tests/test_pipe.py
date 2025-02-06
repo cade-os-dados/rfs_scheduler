@@ -16,7 +16,7 @@ class TestPipeline(unittest.TestCase):
         self.mock_task = MagicMock(__name__ = 'mock_task')
         self.mock_db = MagicMock()
         self.cdir = os.path.dirname(__file__)
-        self.python = os.environ['python']
+        self.python = 'python'
 
     def test_pipeline(self):
         testdir = os.path.join(self.cdir, 'integration/scripts/pipe')

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 # my libs
 try:
-    from dbops import schedulerDatabase
+    from src.dbops import schedulerDatabase
     from src.projtypes import Process, ProcessQueue
 except:
     from dbops import schedulerDatabase
