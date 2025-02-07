@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import subprocess
 import calendar
 
-from pyagenda3.timeops import scheduleOperations as sops
+from pyagenda3 import timeops
 
 @dataclass
 class ProcessOnce:
@@ -65,7 +65,7 @@ class Process:
         id = database.commit_process(self.name, self.schedule)
         result = subprocess.run(self.args, capture_output=True, text=True, **kwargs)
         status = database.check_status(result)
-        database.update_commit(datetime.now(), status, result.stderr, id)
+        database.update_process_status(datetime.now(), status, result.stderr, id)
 
     def stop(self):
         return False
@@ -74,7 +74,7 @@ class Process:
         if self.interval > 0:
             new_schedule = self.schedule
             while new_schedule < datetime.now():
-                new_schedule = sops.calculate_next_period(new_schedule, self.interval)
+                new_schedule = timeops.calculate_next_period(new_schedule, self.interval)
             self.schedule = new_schedule
             return self
 
@@ -96,7 +96,7 @@ class ProcessPipeline:
             id = database.commit_process(process.name, self.schedule)
             result = subprocess.run(process.args, capture_output=True, text=True, timeout=self.timeout)
             status = database.check_status(result)
-            database.update_commit(datetime.now(), status, result.stderr, id)
+            database.update_process_status(datetime.now(), status, result.stderr, id)
 
     def stop(self):
         return not self.interval > 0
@@ -105,7 +105,7 @@ class ProcessPipeline:
         if self.interval > 0:
             new_schedule = self.schedule
             while new_schedule < datetime.now():
-                new_schedule = sops.calculate_next_period(new_schedule, self.interval)
+                new_schedule = timeops.calculate_next_period(new_schedule, self.interval)
             self.schedule = new_schedule
             return self
 

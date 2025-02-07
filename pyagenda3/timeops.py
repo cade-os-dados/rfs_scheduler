@@ -24,42 +24,37 @@ class enumWeek(Enum):
     sabado = 5
     domingo = 6
 
-class scheduleOperations:
+def next_weekday(weekday, hour=0, minute=0, second=0):
+    now = datetime.now()
+    days_until_next_weekday = (weekday - now.weekday() + 7) % 7
+    next_weekday = now + timedelta(days=days_until_next_weekday)
+    next_weekday = datetime(
+        next_weekday.year, next_weekday.month, next_weekday.day, hour=hour, minute=minute, second=second
+    )
+    return next_weekday
 
-    @staticmethod
-    def next_weekday(weekday, hour=0, minute=0, second=0):
-        now = datetime.now()
-        days_until_next_weekday = (weekday - now.weekday() + 7) % 7
-        next_weekday = now + timedelta(days=days_until_next_weekday)
-        next_weekday = datetime(
-            next_weekday.year, next_weekday.month, next_weekday.day, hour=hour, minute=minute, second=second
-        )
-        return next_weekday
+def calculate_next_period(scheduled_time, interval):
+    if isinstance(interval, str):
+        if interval == time_abrev.DAY.value:
+            interval = timedelta(days=1)
+        elif interval == time_abrev.WEEK.value:
+            interval = timedelta(weeks=1)
+        elif interval == time_abrev.MONTH.value:
+            interval = relativedelta(months=1)
+    else:
+        interval = timedelta(seconds=interval)
+    new_scheduled_time = scheduled_time + interval
+    return new_scheduled_time
 
-    @staticmethod
-    def calculate_next_period(scheduled_time, interval):
-        if isinstance(interval, str):
-            if interval == time_abrev.DAY.value:
-                interval = timedelta(days=1)
-            elif interval == time_abrev.WEEK.value:
-                interval = timedelta(weeks=1)
-            elif interval == time_abrev.MONTH.value:
-                interval = relativedelta(months=1)
-        else:
-            interval = timedelta(seconds=interval)
-        new_scheduled_time = scheduled_time + interval
-        return new_scheduled_time
-
-    @staticmethod
-    def proximo_envio_diario(hour, minute=0):
-        hoje = date.today()
-        proxima_execucao = hoje + relativedelta(days=+1)
-        dt_proxima_execucao = datetime(year = proxima_execucao.year, 
-                                     month = proxima_execucao.month, 
-                                     day = proxima_execucao.day, 
-                                     hour = hour,
-                                     minute=minute)
-        return dt_proxima_execucao
+def proximo_envio_diario(hour, minute=0):
+    hoje = date.today()
+    proxima_execucao = hoje + relativedelta(days=+1)
+    dt_proxima_execucao = datetime(year = proxima_execucao.year, 
+                                    month = proxima_execucao.month, 
+                                    day = proxima_execucao.day, 
+                                    hour = hour,
+                                    minute=minute)
+    return dt_proxima_execucao
 
 if __name__ == '__main__':
     assert enumTime.hourly.value == 3600

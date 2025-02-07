@@ -6,7 +6,7 @@ import unittest
 from datetime import datetime
 from pyagenda3.scheduler import Scheduler
 from pyagenda3.pyprocess import pyProcess, projectPaths
-from pyagenda3.projtypes import Process
+from pyagenda3.types import Process
 from unittest.mock import MagicMock, patch
 
 class TestScheduler(unittest.TestCase):

@@ -2,8 +2,8 @@ import time
 import threading
 from datetime import datetime
 
-from pyagenda3.database.dbops import schedulerDatabase
-from pyagenda3.projtypes import Process, ProcessQueue
+from pyagenda3.database.ops import schedulerDatabase
+from pyagenda3.types import Process, ProcessQueue
 
 class Scheduler:
 

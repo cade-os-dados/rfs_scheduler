@@ -1,6 +1,6 @@
 import os
 import re
-from pyagenda3.projtypes import Process
+from pyagenda3.types import Process
 
 DEFAULT_PYTHON_ENV_PATH = 'venv\Scripts\python.exe'
 

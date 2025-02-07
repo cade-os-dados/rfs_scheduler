@@ -3,7 +3,7 @@
 
 import os, unittest
 from pyagenda3.scheduler import Scheduler
-from pyagenda3.projtypes import ProcessPipeline, LightProcess
+from pyagenda3.types import ProcessPipeline, LightProcess
 from unittest.mock import MagicMock
 
 class TestPipeline(unittest.TestCase):

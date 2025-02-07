@@ -5,7 +5,7 @@ import unittest
 
 from datetime import datetime
 
-from pyagenda3.projtypes import TwiceMonthProcess
+from pyagenda3.types import TwiceMonthProcess
 
 class TestProcess(unittest.TestCase):
 
