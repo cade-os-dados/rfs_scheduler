@@ -23,3 +23,6 @@ class TestDatabase(unittest.TestCase):
         db.delete_process(1)
         assert len(db.get_processes()) == 1
         assert db.query('SELECT COUNT(*) FROM scheduled_processes WHERE status_id = 0').fetchone()[0] == 1
+        db.insert_process('ola mundo', 'python -m unittest discover', datetime(2024, 5,1), 10)
+        db.insert_process('HELLO WOULD', 'python -m unittest discover', datetime(2024, 5,1), 10)
+        db.insert_process('CIAO', 'python -m unittest discover', datetime(2024, 5,1), 10)
