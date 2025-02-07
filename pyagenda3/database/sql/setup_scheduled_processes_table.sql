@@ -3,7 +3,8 @@
     process_name TEXT NOT NULL,
     args TEXT NOT NULL,
     scheduled_time DATETIME NOT NULL,
-    interval INT
+    interval INT,
+    status_id -- 0 ou 1, se está ativo ou inativo
     --future
     /*
         timeout INT NOT NULL,

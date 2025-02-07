@@ -32,6 +32,12 @@ class schedulerDatabase:
         self.filename = filename
         self.handler = SQLFileHandler(relpath(__file__,'sql'))
 
+    def execute(self, cmd: str):
+        execute(self.filename, cmd)
+    
+    def query(self, cmd: str):
+        return query(self.filename, cmd)
+
     def check_memory_mb(self) -> float:
         return round(virtual_memory()[1] / 10**6, 2)
 
@@ -62,7 +68,7 @@ class schedulerDatabase:
     
     def get_processes(self) -> list:
         treated = []
-        processes = query(self.filename, 'SELECT process_name, args, scheduled_time, interval FROM scheduled_processes')
+        processes = query(self.filename, self.handler.get('select_active_process.sql'))
         def str_to_dt(string: str):
             ano, mes, dia = int(string[:4]), int(string[5:7]), int(string[8:10])
             hora, minuto, segundo = int(string[11:13]), int(string[14:16]), int(string[17:19])
@@ -81,7 +87,15 @@ class schedulerDatabase:
     def insert_process(self, process_name: str, args: str, scheduled_time: datetime, interval: int) -> bool:
         query = self.handler.get('insert_process.sql')
         with self.lock:
-            id = commit(self.filename, query, (process_name, args, scheduled_time, interval,), return_id=True)
+            id = commit(self.filename, query, (process_name, args, scheduled_time, interval, 1), return_id=True)
         return id > 0
 
+    def change_process_status(self, status_id: bool, process_id: int):
+        commit(
+            self.filename, 
+            self.handler.get('update_process_status_id.sql'), 
+            (int(status_id), process_id)
+        )
 
+    def delete_process(self, process_id: int):
+        commit(self.filename, self.handler.get('delete_process.sql'), (process_id, ))
