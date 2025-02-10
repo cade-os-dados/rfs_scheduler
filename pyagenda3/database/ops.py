@@ -89,6 +89,11 @@ class schedulerDatabase:
         with self.lock:
             id = commit(self.filename, query, (process_name, args, cwd, scheduled_time, interval, 1), return_id=True)
         return id > 0
+    
+    def edit_process(self, process_id: int, process_name: str, args: str, cwd: str, scheduled_time: datetime, interval: int) -> bool:
+        query = self.handler.get('edit_process.sql')
+        with self.lock:
+            id = commit(self.filename, query, (process_name, args, cwd, scheduled_time, interval, 1, process_id))
 
     def change_process_status(self, status_id: bool, process_id: int):
         commit(
