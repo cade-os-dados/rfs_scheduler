@@ -23,6 +23,7 @@ class TestScheduler(unittest.TestCase):
                 script_name="main.py"
             ),
             process_name = "hello",
+            cwd='C:/local',
             scheduled_time = datetime(2022,1,1)
         ).parse()
         self.scheduler.add_process(processo)
@@ -30,6 +31,7 @@ class TestScheduler(unittest.TestCase):
             self.scheduler.queue.processes[0],
             Process(
                 ['local\\venv\\Scripts\\python.exe', 'local\\main.py'], 
+                'C:/local',
                 "hello", 
                 datetime(2022,1,1), 
                 None
@@ -42,6 +44,7 @@ class TestScheduler(unittest.TestCase):
                 script_name="main.py",
                 args = '--hello --world'
             ),
+            cwd='C:/local',
             process_name = "hello",
             scheduled_time = datetime(2022,1,1)
         ).parse()
@@ -50,6 +53,7 @@ class TestScheduler(unittest.TestCase):
             self.scheduler.queue.processes[1],
             Process(
                 ['local\\venv\\Scripts\\python.exe', 'local\\main.py', '--hello', '--world'], 
+                'C:/local',
                 "hello", 
                 datetime(2022,1,1), 
                 None

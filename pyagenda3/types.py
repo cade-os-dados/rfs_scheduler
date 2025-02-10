@@ -49,6 +49,7 @@ class TwiceMonthProcess(ProcessOnce):
 @dataclass
 class Process:
     args: list
+    cwd: str
     name: str
     schedule: datetime
     interval: int
@@ -63,7 +64,7 @@ class Process:
     
     def run(self, database, **kwargs):
         id = database.commit_process(self.name, self.schedule)
-        result = subprocess.run(self.args, capture_output=True, text=True, **kwargs)
+        result = subprocess.run(self.args, capture_output=True, text=True, cwd=self.cwd, **kwargs)
         status = database.check_status(result)
         database.update_process_status(datetime.now(), status, result.stderr, id)
 

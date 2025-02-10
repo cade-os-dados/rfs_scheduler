@@ -22,7 +22,7 @@ class TestPath(unittest.TestCase):
             script_name = 'world.py',
             args = '--br  --translate'
         )
-        processo = pyProcess(process_name='ola', scheduled_time=datetime.now(), paths = teste)
+        processo = pyProcess(process_name='ola', cwd='teste', scheduled_time=datetime.now(), paths = teste)
         self.assertEqual(
             processo.processes_args, 
             ['hello\\venv\\Scripts\\python.exe', 'hello\\world.py', '--br', '--translate'], 
@@ -31,7 +31,7 @@ class TestPath(unittest.TestCase):
 
         # mudando a estrutura de dados para verificar se continuará funcionando
         teste.args = ['--br', ' --translate']
-        processo = pyProcess(process_name='ola', scheduled_time=datetime.now(), paths = teste)
+        processo = pyProcess(process_name='ola',cwd='teste', scheduled_time=datetime.now(), paths = teste)
         self.assertEqual(
             processo.processes_args, 
             ['hello\\venv\\Scripts\\python.exe', 'hello\\world.py', '--br', '--translate'], 
@@ -39,7 +39,7 @@ class TestPath(unittest.TestCase):
         )
 
         teste.args = None
-        processo = pyProcess(process_name='ola', scheduled_time=datetime.now(), paths = teste)
+        processo = pyProcess(process_name='ola',cwd='teste', scheduled_time=datetime.now(), paths = teste)
         self.assertEqual(
             processo.processes_args, 
             ['hello\\venv\\Scripts\\python.exe', 'hello\\world.py'], 

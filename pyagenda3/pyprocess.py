@@ -17,11 +17,12 @@ class projectPaths:
     
 class pyProcess:
 
-    def __init__(self, process_name, scheduled_time, interval=None, python_path=None, script_path=None, args=None, paths: projectPaths = None):
+    def __init__(self, process_name, cwd, scheduled_time, interval=None, python_path=None, script_path=None, args=None, paths: projectPaths = None):
         self.python_path, self.script_path, args = self.setup_paths(python_path, script_path, args, paths)
         self.process_name = process_name
         self.scheduled_time = scheduled_time
         self.interval = interval
+        self.cwd = cwd
         self.create_process_args(args)
 
     def setup_paths(self, python_path, script_path, args, paths) -> tuple:
@@ -44,4 +45,4 @@ class pyProcess:
             self.processes_args.append(arg)
 
     def parse(self) -> Process:
-        return Process(self.processes_args, self.process_name, self.scheduled_time, self.interval)
+        return Process(self.processes_args, self.cwd, self.process_name, self.scheduled_time, self.interval)

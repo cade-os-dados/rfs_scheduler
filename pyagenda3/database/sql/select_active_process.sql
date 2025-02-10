@@ -1,5 +1,5 @@
 SELECT 
-    process_name, args, scheduled_time, interval 
+    process_name, args, cwd, scheduled_time, interval 
 FROM 
     scheduled_processes 
 WHERE 

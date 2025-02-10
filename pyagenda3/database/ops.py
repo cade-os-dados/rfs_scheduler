@@ -74,20 +74,20 @@ class schedulerDatabase:
             hora, minuto, segundo = int(string[11:13]), int(string[14:16]), int(string[17:19])
             return datetime(ano,mes,dia,hora,minuto,segundo)
         def parse_tuple(tupla: tuple):
-            args = tupla[1].split(' ')
-            name, interval = tupla[0], tupla[3]
-            stime = str_to_dt(tupla[2])
-            return Process(args, name, stime, interval)
+            args, cwd = tupla[1].split(' '), tupla[2]
+            name, interval = tupla[0], tupla[4]
+            stime = str_to_dt(tupla[3])
+            return Process(args, cwd, name, stime, interval)
         if processes is None:
             return None
         for process in processes:
             treated.append(parse_tuple(process))
         return treated
     
-    def insert_process(self, process_name: str, args: str, scheduled_time: datetime, interval: int) -> bool:
+    def insert_process(self, process_name: str, args: str, cwd: str, scheduled_time: datetime, interval: int) -> bool:
         query = self.handler.get('insert_process.sql')
         with self.lock:
-            id = commit(self.filename, query, (process_name, args, scheduled_time, interval, 1), return_id=True)
+            id = commit(self.filename, query, (process_name, args, cwd, scheduled_time, interval, 1), return_id=True)
         return id > 0
 
     def change_process_status(self, status_id: bool, process_id: int):

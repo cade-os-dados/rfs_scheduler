@@ -75,7 +75,7 @@ class App(tk.Tk):
         else:
             validar_inteiro(self.i.get())
             dt_ = datetime.strptime(self.dt.get(),"%d/%m/%Y")
-            self.db.insert_process(self.nome.get(), self.argumento.get(), dt_, int(self.i.get()))
+            self.db.insert_process(self.nome.get(), self.argumento.get(), self.caminho.get(), dt_, int(self.i.get()))
             messagebox.showinfo('Sucesso!', 'Seu processo foi salvo com sucesso!')
             if not messagebox.askyesno("Continuar?", "Deseja inserir mais processos?"):
                 self.atualiza_processos()
@@ -92,13 +92,14 @@ class App(tk.Tk):
         self.mpopup_frame2.pack()
     
         # sets the geometry of toplevel
-        self.mpopup.geometry("300x300")
+        self.mpopup.geometry("300x180")
     
         # A Label widget to show in toplevel
         self.nome = self.label_entry(self.mpopup_frame1, 'Nome', 0)
-        self.argumento = self.label_entry(self.mpopup_frame1, 'Args', 1)
-        self.dt = self.label_entry(self.mpopup_frame1, 'Date', 2)
-        self.i = self.label_entry(self.mpopup_frame1, 'Interval', 3)
+        self.argumento = self.label_entry(self.mpopup_frame1, 'Argumento', 1)
+        self.caminho = self.label_entry(self.mpopup_frame1, 'Caminho', 2)
+        self.dt = self.label_entry(self.mpopup_frame1, 'Date', 3)
+        self.i = self.label_entry(self.mpopup_frame1, 'Interval', 4)
         ok = tk.Button(self.mpopup_frame2, text='OK',command=self.valida,width=10)
         ok.pack()
 
