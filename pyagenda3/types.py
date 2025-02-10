@@ -69,7 +69,7 @@ class Process:
         database.update_process_status(datetime.now(), status, result.stderr, id)
 
     def stop(self):
-        return False
+        return False if self.interval > 0 else True
 
     def next(self):
         if self.interval > 0:
