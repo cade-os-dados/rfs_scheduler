@@ -11,10 +11,10 @@ def execute(db_filename, command):
         cursor = conn.cursor()
         cursor.execute(command)
 
-def query(db_filename, command):
+def query(db_filename, command, argument=''):
     with sqlite3.connect(db_filename) as conn:
         cursor = conn.cursor()
-        result = cursor.execute(command)
+        result = cursor.execute(command, argument) if len(argument) else cursor.execute(command)
     return result
 
 def commit(db_filename, command, argument, return_id = False):
@@ -34,9 +34,12 @@ class schedulerDatabase:
 
     def execute(self, cmd: str):
         execute(self.filename, cmd)
+
+    def commit(self, cmd: str, argument: str):
+        commit(self.filename, cmd, argument, False)
     
-    def query(self, cmd: str):
-        return query(self.filename, cmd)
+    def query(self, cmd: str, argument=''):
+        return query(self.filename, cmd, argument)
 
     def check_memory_mb(self) -> float:
         return round(virtual_memory()[1] / 10**6, 2)
@@ -104,3 +107,6 @@ class schedulerDatabase:
 
     def delete_process(self, process_id: int):
         commit(self.filename, self.handler.get('delete_process.sql'), (process_id, ))
+
+    def ping(self, server_id: str):
+        commit(self.filename, self.handler.get('ping_server.sql'),(server_id,))
