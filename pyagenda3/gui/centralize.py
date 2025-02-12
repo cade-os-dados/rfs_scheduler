@@ -24,6 +24,18 @@ def toplevel_centralize(master, width, height, deiconify=True):
         mpopup.deiconify()
     return mpopup
 
+
+def get_mouse_position(master) -> tuple:
+    x = master.winfo_pointerx() - master.winfo_vrootx()
+    y = master.winfo_pointery() - master.winfo_vrooty()
+    return x, y
+
+def spawn_on_mouse(master, widget, dim: tuple):
+    x,y = get_mouse_position(master)
+    x -= (dim[0]/2); y -= (dim[1]/2)
+    x = int(x); y = int(y)
+    widget.geometry(f"{dim[0]}x{dim[1]}+{x}+{y}")
+
 # apenas para fins de visualização
 if __name__ == '__main__':
     root = tk.Tk()

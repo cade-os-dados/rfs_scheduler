@@ -64,16 +64,16 @@ def show_servers(self):
                                 textvariable = self.chosen_server,
                                 state='readonly')
     self.servers['values'] = self.list_ping_server().fetchall()
-    self.servers.pack(pady=10)
-    combobox_defocus(self.servers)
-
+    if len(self.servers['values']):
+        self.servers.pack(pady=10)
+        combobox_defocus(self.servers)
+        tk.Button(self.frame4, text='verificar conexão', command=self.teste_conexao, width=20).pack(side=tk.BOTTOM)
+    else:
+        tk.Label(self.frame4, text='Nenhum servidor ativo encontrado').pack(pady=10)
+  
     # self.servers = []
     # for server in self.list_ping_server():
     #     check = tk.Checkbutton(self.frame3, text=server)
     #     check.pack(side=tk.TOP)
     #     self.servers.append(check)
     #     print(self.servers)
-    if self.list_ping_server():
-        tk.Button(self.frame4, text='verificar conexão', command=self.teste_conexao, width=20).pack(side=tk.BOTTOM)
-    else:
-        tk.Label(self.frame4, text='Nenhum servidor ativo encontrado').pack(pady=10)

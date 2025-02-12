@@ -5,7 +5,8 @@ from tkinter import messagebox
 from pyagenda3.database.ops import schedulerDatabase
 from datetime import datetime
 from pyagenda3.utils import relpath
-from pyagenda3.gui.centralize import toplevel_centralize, centralize_dimensions
+from pyagenda3.gui.centralize import toplevel_centralize, centralize_dimensions, spawn_on_mouse
+from historico import abrir_historico
 
 # from pyagenda3.gui.ping import list_ping_server, show_servers
 from ping import *
@@ -13,10 +14,6 @@ from ping import *
 
 DEBUG = True
 
-def get_mouse_position(master) -> tuple:
-    x = master.winfo_pointerx() - master.winfo_vrootx()
-    y = master.winfo_pointery() - master.winfo_vrooty()
-    return x, y
 
 def validar_data(data_str):
     formato ="%d/%m/%Y" # Formato de data :dia/mês/ano
@@ -53,13 +50,7 @@ class App(tk.Tk):
         self.db = schedulerDatabase('scheduler.db')
         self.atualiza_processos()
                 
-        import ctypes
-        # Change the taskbar icon
-        myappid = 'your_company_name.your_product_name.subproduct.version'  # Choose a unique ID
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-        photo = tk.PhotoImage(file = relpath(__file__, 'assets/calendario2.png'))
-        self.wm_iconphoto(False, photo)
-
+        self.taskbar_icon()
         self.mainframe = tk.Frame(self)
         self.mainframe.pack()
 
@@ -73,6 +64,14 @@ class App(tk.Tk):
 
         self.show_servers()
         self.spawn_rcmenu()
+
+    def taskbar_icon(self):
+        import ctypes
+        # Change the taskbar icon
+        myappid = 'your_company_name.your_product_name.subproduct.version'  # Choose a unique ID
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        photo = tk.PhotoImage(file = relpath(__file__, 'assets/calendario2.png'))
+        self.wm_iconphoto(False, photo)
 
     def atualiza_processos(self):
         self.processes = self.db.query('SELECT * FROM scheduled_processes')
@@ -91,15 +90,13 @@ class App(tk.Tk):
         self.edit = tk.Toplevel(self)
         self.edit.transient(self)
         self.edit.title("Editar")
-        x,y=get_mouse_position(self)
-        self.edit.geometry(f"300x160+{x-150}+{y-80}")
+        # x,y=get_mouse_position(self)
+        # self.edit.geometry(f"300x160+{x-150}+{y-80}")
+        spawn_on_mouse(self, self.edit, (300,160))
         self.edit_frame1 = tk.Frame(self.edit, pady=5)
         self.edit_frame2 = tk.Frame(self.edit, pady=5)
         self.edit_frame1.pack()
         self.edit_frame2.pack()
-
-        # sets the geometry of toplevel
-        # self.edit.geometry("300x160+400+300")
     
         # A Label widget to show in toplevel
         self.nome = self.label_entry(self.edit_frame1, 'Nome', 0); set_text(self.nome, dados[1])
@@ -169,8 +166,7 @@ class App(tk.Tk):
         self.mpopup_frame2.pack()
 
         # sets the geometry of toplevel
-        x,y=get_mouse_position(self)
-        self.mpopup.geometry(f"300x180+{x-150}+{y-90}")
+        spawn_on_mouse(self, self.mpopup, dim = (300,180))
     
         # A Label widget to show in toplevel
         self.nome = self.label_entry(self.mpopup_frame1, 'Nome', 0)
@@ -189,14 +185,14 @@ class App(tk.Tk):
         self.popup_window.geometry("200x200")
     
         # A Label widget to show in toplevel
-        tk.Label(self.popup_window, 
-        text ="This is a new window").pack()
+        tk.Label(self.popup_window, text ="This is a new window").pack()
 
     def spawn_rcmenu(self):
         'right click menu'
         self.rcmenu = tk.Menu(self.arvore, tearoff=0)
         self.rcmenu.add_command(label="Editar", command=self.edit_process)
         self.rcmenu.add_command(label="Novo", command=self.new_form)
+        self.rcmenu.add_command(label="Histórico", command=lambda: self.abrir_historico('add'))
         self.rcmenu.add_separator()
         self.rcmenu.add_command(label="Excluir", command=self.delete_process)
 
@@ -247,6 +243,7 @@ class App(tk.Tk):
 App.list_ping_server = list_ping_server
 App.show_servers = show_servers
 App.teste_conexao = teste_conexao
+App.abrir_historico = abrir_historico
 
 if __name__ == '__main__':
     root = App()
