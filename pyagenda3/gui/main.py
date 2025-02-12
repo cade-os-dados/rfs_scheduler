@@ -1,10 +1,22 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import font
 from tkinter import messagebox
 from pyagenda3.database.ops import schedulerDatabase
 from datetime import datetime
+from pyagenda3.utils import relpath
+from pyagenda3.gui.centralize import toplevel_centralize, centralize_dimensions
+
+# from pyagenda3.gui.ping import list_ping_server, show_servers
+from ping import *
+
 
 DEBUG = True
+
+def get_mouse_position(master) -> tuple:
+    x = master.winfo_pointerx() - master.winfo_vrootx()
+    y = master.winfo_pointery() - master.winfo_vrooty()
+    return x, y
 
 def validar_data(data_str):
     formato ="%d/%m/%Y" # Formato de data :dia/mês/ano
@@ -31,23 +43,36 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Processos")
-        self.geometry("1280x720")
+        # geometria
+        w,h = self.winfo_screenwidth(), self.winfo_screenheight()
+        w_, h_ = 1280, 720
+        pos = centralize_dimensions(w,h,0,0,w_,h_)
+        self.geometry(f"{w_}x{h_}+{pos[0]}+{pos[1]}")
+        # fonte
+        self.mainfont = font.Font(family='Helvetica',size=14, weight='bold')
         self.db = schedulerDatabase('scheduler.db')
         self.atualiza_processos()
+                
+        import ctypes
+        # Change the taskbar icon
+        myappid = 'your_company_name.your_product_name.subproduct.version'  # Choose a unique ID
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        photo = tk.PhotoImage(file = relpath(__file__, 'assets/calendario2.png'))
+        self.wm_iconphoto(False, photo)
 
-        self.frame2 = tk.Frame(self)
-        self.frame2.pack(side=tk.LEFT, anchor='n')
-        self.frame1 = tk.Frame(self, bg='lightgray')
-        self.frame1.pack(side=tk.LEFT, anchor='ne')
+        self.mainframe = tk.Frame(self)
+        self.mainframe.pack()
+
+        self.frame2_title = tk.Frame(self.mainframe)
+        self.frame2_title.grid(row=0,column=0)
+        tk.Label(self.frame2_title, text='Listagem de Processos', font=self.mainfont,pady=20).pack()
+
+        self.frame2 = tk.Frame(self.mainframe)
+        self.frame2.grid(row=1,column=0)
         self.make_treeview(self.frame2)
- 
-        self.button_new = tk.Button(self.frame1, text='Novo', pady=10, padx=50)
-        self.button_new.pack(side=tk.TOP, fill=tk.X)
-        self.button_new.bind('<Button-1>', self.new_form)
-        self.button_edit = tk.Button(self.frame1, text='Editar', pady=10, padx=20, command=self.edit_process)
-        self.button_edit.pack(side=tk.TOP, fill=tk.X)
-        self.button_delete = tk.Button(self.frame1, text='Excluir', pady=10, padx=10, command=self.delete_process)
-        self.button_delete.pack(side=tk.TOP, fill=tk.X)
+
+        self.show_servers()
+        self.spawn_rcmenu()
 
     def atualiza_processos(self):
         self.processes = self.db.query('SELECT * FROM scheduled_processes')
@@ -66,13 +91,15 @@ class App(tk.Tk):
         self.edit = tk.Toplevel(self)
         self.edit.transient(self)
         self.edit.title("Editar")
+        x,y=get_mouse_position(self)
+        self.edit.geometry(f"300x160+{x-150}+{y-80}")
         self.edit_frame1 = tk.Frame(self.edit, pady=5)
         self.edit_frame2 = tk.Frame(self.edit, pady=5)
         self.edit_frame1.pack()
         self.edit_frame2.pack()
 
         # sets the geometry of toplevel
-        self.edit.geometry("300x160+400+300")
+        # self.edit.geometry("300x160+400+300")
     
         # A Label widget to show in toplevel
         self.nome = self.label_entry(self.edit_frame1, 'Nome', 0); set_text(self.nome, dados[1])
@@ -84,7 +111,6 @@ class App(tk.Tk):
         ok.pack()
         self.edit.focus_force()
 
-    
     def edit_db(self):
         # Testando a função
         if not validar_data(self.dt.get()):
@@ -133,7 +159,7 @@ class App(tk.Tk):
                 self.mpopup.destroy()
                 self.update_treeview()
 
-    def new_form(self, event):
+    def new_form(self):
         self.mpopup = tk.Toplevel(self)
         self.mpopup.transient(self)
         self.mpopup.title("New Window")
@@ -143,7 +169,8 @@ class App(tk.Tk):
         self.mpopup_frame2.pack()
 
         # sets the geometry of toplevel
-        self.mpopup.geometry("300x180")
+        x,y=get_mouse_position(self)
+        self.mpopup.geometry(f"300x180+{x-150}+{y-90}")
     
         # A Label widget to show in toplevel
         self.nome = self.label_entry(self.mpopup_frame1, 'Nome', 0)
@@ -164,6 +191,20 @@ class App(tk.Tk):
         # A Label widget to show in toplevel
         tk.Label(self.popup_window, 
         text ="This is a new window").pack()
+
+    def spawn_rcmenu(self):
+        'right click menu'
+        self.rcmenu = tk.Menu(self.arvore, tearoff=0)
+        self.rcmenu.add_command(label="Editar", command=self.edit_process)
+        self.rcmenu.add_command(label="Novo", command=self.new_form)
+        self.rcmenu.add_separator()
+        self.rcmenu.add_command(label="Excluir", command=self.delete_process)
+
+    def popup_rcmenu(self, event):
+        try:
+            self.rcmenu.tk_popup(event.x_root, event.y_root)
+        finally:
+            self.rcmenu.grab_release()
 
     def on_treeview_select(self, event):
         selected_item = self.arvore.selection()
@@ -195,12 +236,17 @@ class App(tk.Tk):
         for i, linha in enumerate(self.processes):
             self.arvore.insert("", "end", values=linha)
     
-        self.arvore.pack(expand=True)
+        self.arvore.pack(expand=True, fill=tk.Y)
         self.arvore.bind('<<TreeviewSelect>>', self.on_treeview_select)
         self.arvore.bind('<Double-1>', self.pop_up)
+        self.arvore.bind('<Button-3>', self.popup_rcmenu)
 
         display = cols[1:]
         self.arvore["displaycolumns"] = display
+
+App.list_ping_server = list_ping_server
+App.show_servers = show_servers
+App.teste_conexao = teste_conexao
 
 if __name__ == '__main__':
     root = App()

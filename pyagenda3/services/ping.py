@@ -41,7 +41,7 @@ class PingService:
             sleep(self.interval)
 
 
-class ClientPing:
+class PingClient:
 
     def __init__(self, db: str, max_wait_in_seconds: int = 5):
         self.db = schedulerDatabase(db)
@@ -62,4 +62,9 @@ class ClientPing:
             if c >= self.max_wait_in_seconds:
                 return False
         return True
+    
+    def rcv2(self,server_ip):
+        consulta = 'SELECT ping_status FROM ping_server WHERE server_ip = ?'
+        ping = self.db.query(consulta, (server_ip,)).fetchone()
+        return ping[0] == 'ACTIVE'
         

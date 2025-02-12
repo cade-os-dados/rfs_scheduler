@@ -14,3 +14,7 @@ do scheduler e sim com o arquivo sqlite
 # ORM
 
 Implementar um esquema mais fácil para lidar com o banco de dados, dado a grande quantidade de migrations/queries do banco...
+
+# Ping server
+
+Criar testes e a GUI
