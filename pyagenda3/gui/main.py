@@ -12,6 +12,8 @@ from tkcalendar import DateEntry
 from ping import *
 
 DEBUG = True
+MINUTO = 60; HORA = 60*MINUTO; DIA = 24*HORA; SEMANA = 7*DIA;
+OPCOES_INTERVALO = ['12 horas', '1 dia', '1 semana']
 
 def validar_data(data_str):
     formato ="%d/%m/%Y" # Formato de data :dia/mês/ano
@@ -20,11 +22,31 @@ def validar_data(data_str):
         return True
     except ValueError:
         return False
-    
-def validar_inteiro(entrada):
+
+def secs_to_string(dado):
+    try:
+        dado = int(dado)
+    except:
+        pass
+    if dado == 12*HORA:
+        return '12 horas'
+    if dado == DIA:
+        return '1 dia'
+    if dado == SEMANA:
+        return '1 semana'
+    else:
+        return dado
+
+def validar_intervalo(entrada):
+    if entrada == '12 horas':
+        entrada = 12*HORA
+    elif entrada == '1 dia':
+        entrada = DIA
+    else:
+        entrada = SEMANA
     try:
         numero = int(entrada)
-        return True
+        return numero
     except ValueError:
         messagebox.showerror("Entrada inválida", "Por favor, digite um número inteiro no campo intervalo.")
         return False
@@ -107,7 +129,15 @@ class App(tk.Tk):
         DateEntry(self.edit_frame1,selectmode='day',textvariable=self.dt,locale='pt_br',width=22).grid(row=3,column=1)
         self.dt.set(fmt_dtstr(dados[4]))
         # interval
-        self.i = self.label_entry(self.edit_frame1, 'Interval', 4); set_text(self.i, dados[5])
+        tk.Label(self.edit_frame1, text='Intervalo: ',width=10, anchor='w').grid(row=4,column=0)
+        self.i = ttk.Combobox(self.edit_frame1,values=OPCOES_INTERVALO, width=22)
+        self.i.grid(row=4,column=1); # set_text(self.i, secs_to_string(dados[5]))
+        new_data = secs_to_string(dados[5])
+        print(new_data)
+        self.i.set(new_data)
+        
+       
+        # self.i = self.label_entry(self.edit_frame1, 'Interval', 4); set_text(self.i, dados[5])
         ok = tk.Button(self.edit_frame2, text='OK',command=self.edit_db,width=10)
         ok.pack()
         self.edit.focus_force()
@@ -117,9 +147,9 @@ class App(tk.Tk):
         if not validar_data(self.dt.get()):
             messagebox.showerror("Entrada inválida", "Por favor, digite uma data no formato DIA/MES/ANO no campo de data.")
         else:
-            validar_inteiro(self.i.get())
+            intervalo = validar_intervalo(self.i.get())
             dt_ = datetime.strptime(self.dt.get(),"%d/%m/%Y")
-            novos_dados = self.nome.get(), self.argumento.get(), self.caminho.get(), dt_, int(self.i.get())
+            novos_dados = self.nome.get(), self.argumento.get(), self.caminho.get(), dt_, intervalo
             self.db.edit_process(self.edit_id, *novos_dados)
             self.atualiza_processos()
             self.edit.destroy()
@@ -151,9 +181,9 @@ class App(tk.Tk):
         if not validar_data(self.dt_new.get()):
             messagebox.showerror("Entrada inválida", "Por favor, digite uma data no formato DIA/MES/ANO no campo de data.")
         else:
-            validar_inteiro(self.i.get())
+            intervalo = validar_intervalo(self.i.get())
             dt_ = datetime.strptime(self.dt_new.get(),"%d/%m/%Y")
-            self.db.insert_process(self.nome.get(), self.argumento.get(), self.caminho.get(), dt_, int(self.i.get()))
+            self.db.insert_process(self.nome.get(), self.argumento.get(), self.caminho.get(), dt_, intervalo)
             messagebox.showinfo('Sucesso!', 'Seu processo foi salvo com sucesso!')
             if not messagebox.askyesno("Continuar?", "Deseja inserir mais processos?"):
                 self.atualiza_processos()
@@ -180,7 +210,11 @@ class App(tk.Tk):
         self.dt_new=tk.StringVar()
         entry = DateEntry(self.mpopup_frame1,selectmode='day',textvariable=self.dt_new,locale='pt_br',width=22)
         entry.grid(row=3,column=1); entry.delete(0,"end")
-        self.i = self.label_entry(self.mpopup_frame1, 'Interval', 4)
+        # self.i = self.label_entry(self.mpopup_frame1, 'Interval', 4)
+        tk.Label(self.mpopup_frame1, text='Intervalo: ',width=10, anchor='w').grid(row=4,column=0)
+        self.i = ttk.Combobox(self.mpopup_frame1,values=OPCOES_INTERVALO, width=22)
+        self.i.grid(row=4,column=1)
+        # self.i = self.label_entry(self.mpopup_frame1, 'Interval', 4)
         ok = tk.Button(self.mpopup_frame2, text='OK',command=self.valida,width=10)
         ok.pack()
 
