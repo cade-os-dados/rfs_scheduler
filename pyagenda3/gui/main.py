@@ -7,13 +7,11 @@ from datetime import datetime
 from pyagenda3.utils import relpath
 from pyagenda3.gui.centralize import toplevel_centralize, centralize_dimensions, spawn_on_mouse
 from historico import abrir_historico
+from tkcalendar import DateEntry
 
-# from pyagenda3.gui.ping import list_ping_server, show_servers
 from ping import *
 
-
 DEBUG = True
-
 
 def validar_data(data_str):
     formato ="%d/%m/%Y" # Formato de data :dia/mês/ano
@@ -65,13 +63,17 @@ class App(tk.Tk):
         self.show_servers()
         self.spawn_rcmenu()
 
+        # limitação de exibição do histórico
+        self.limit_hist = tk.StringVar(self)
+        self.limit_hist.set("20")
+
     def taskbar_icon(self):
         import ctypes
         # Change the taskbar icon
         myappid = 'your_company_name.your_product_name.subproduct.version'  # Choose a unique ID
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
         photo = tk.PhotoImage(file = relpath(__file__, 'assets/calendario2.png'))
-        self.wm_iconphoto(False, photo)
+        self.wm_iconphoto(True, photo)
 
     def atualiza_processos(self):
         self.processes = self.db.query('SELECT * FROM scheduled_processes')
@@ -90,19 +92,21 @@ class App(tk.Tk):
         self.edit = tk.Toplevel(self)
         self.edit.transient(self)
         self.edit.title("Editar")
-        # x,y=get_mouse_position(self)
-        # self.edit.geometry(f"300x160+{x-150}+{y-80}")
         spawn_on_mouse(self, self.edit, (300,160))
         self.edit_frame1 = tk.Frame(self.edit, pady=5)
         self.edit_frame2 = tk.Frame(self.edit, pady=5)
         self.edit_frame1.pack()
         self.edit_frame2.pack()
     
-        # A Label widget to show in toplevel
         self.nome = self.label_entry(self.edit_frame1, 'Nome', 0); set_text(self.nome, dados[1])
         self.argumento = self.label_entry(self.edit_frame1, 'Argumento', 1); set_text(self.argumento, dados[2])
         self.caminho = self.label_entry(self.edit_frame1, 'Caminho', 2); set_text(self.caminho, dados[3])
-        self.dt = self.label_entry(self.edit_frame1, 'Date', 3); set_text(self.dt, fmt_dtstr(dados[4]))
+        # date entry
+        tk.Label(self.edit_frame1, text='Data: ',width=10, anchor='w').grid(row=3,column=0)
+        self.dt=tk.StringVar(self)
+        DateEntry(self.edit_frame1,selectmode='day',textvariable=self.dt,locale='pt_br',width=22).grid(row=3,column=1)
+        self.dt.set(fmt_dtstr(dados[4]))
+        # interval
         self.i = self.label_entry(self.edit_frame1, 'Interval', 4); set_text(self.i, dados[5])
         ok = tk.Button(self.edit_frame2, text='OK',command=self.edit_db,width=10)
         ok.pack()
@@ -144,11 +148,11 @@ class App(tk.Tk):
 
     def valida(self):
         # Testando a função
-        if not validar_data(self.dt.get()):
+        if not validar_data(self.dt_new.get()):
             messagebox.showerror("Entrada inválida", "Por favor, digite uma data no formato DIA/MES/ANO no campo de data.")
         else:
             validar_inteiro(self.i.get())
-            dt_ = datetime.strptime(self.dt.get(),"%d/%m/%Y")
+            dt_ = datetime.strptime(self.dt_new.get(),"%d/%m/%Y")
             self.db.insert_process(self.nome.get(), self.argumento.get(), self.caminho.get(), dt_, int(self.i.get()))
             messagebox.showinfo('Sucesso!', 'Seu processo foi salvo com sucesso!')
             if not messagebox.askyesno("Continuar?", "Deseja inserir mais processos?"):
@@ -172,7 +176,10 @@ class App(tk.Tk):
         self.nome = self.label_entry(self.mpopup_frame1, 'Nome', 0)
         self.argumento = self.label_entry(self.mpopup_frame1, 'Argumento', 1)
         self.caminho = self.label_entry(self.mpopup_frame1, 'Caminho', 2)
-        self.dt = self.label_entry(self.mpopup_frame1, 'Date', 3)
+        tk.Label(self.mpopup_frame1, text='Data: ',width=10, anchor='w').grid(row=3,column=0)
+        self.dt_new=tk.StringVar()
+        entry = DateEntry(self.mpopup_frame1,selectmode='day',textvariable=self.dt_new,locale='pt_br',width=22)
+        entry.grid(row=3,column=1); entry.delete(0,"end")
         self.i = self.label_entry(self.mpopup_frame1, 'Interval', 4)
         ok = tk.Button(self.mpopup_frame2, text='OK',command=self.valida,width=10)
         ok.pack()
@@ -220,8 +227,9 @@ class App(tk.Tk):
     def make_treeview(self, master):
         cols = [f'col{i}' for i in range(1,7)]
         self.arvore = ttk.Treeview(master, columns=cols, show="headings")
-        for col, name in zip(cols, ["id", "nome", "arg", "cwd", "data", "intervalo (em segundos)"]):
-            self.arvore.heading(col, text=name)
+        for col, name in zip(cols, ["id", "Nome", "Argumentos", "Caminho", "Data/Hora Agendamento", "Intervalo de Execuções (seg.)"]):
+            self.arvore.heading(col, text=name,anchor='center')
+            self.arvore.column(col, anchor='center')
         
         # Cria a Scrollbar horizontal
         scrollbar_x = ttk.Scrollbar(master, orient="horizontal", command=self.arvore.xview)

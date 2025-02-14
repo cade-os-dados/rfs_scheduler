@@ -1,7 +1,3 @@
-# Servidores disponíveis
-
-Criar um frame que mostre os servidores disponíveis e que tenha uma opção para pingar no servidor
-
 # Rodar instantaneamente
 
 Opção de mandar rodar o processo instantaneamente. Exigir uma senha para realizar esta função.
@@ -15,10 +11,10 @@ usando ao mesmo tempo
 
 Exigir senha para permitir o usuário editar algum processo e outra para o usuário rodar...
 
-# Histórico
-
-Abrir como se fosse no SyBase, uma tela com histórico das últimas vezes que rodou e se foi sucesso ou não...
-
 # Intervalo em dias
 
 Adicionar opções de 1 dia, 0,5 dia, 1 semana, etc...
+
+# Servidores
+
+Editar os processos por servidor e exibir conforme o servidor selecionado
