@@ -54,11 +54,11 @@ class schedulerDatabase:
         with self.lock:
             commit(self.filename, query, (task_name, scheduled_time, status))
     
-    def commit_process(self, process_name, scheduled_time):
+    def commit_process(self, process_id, scheduled_time):
         query = self.handler.get('commit_process.sql')
         free_mem = self.check_memory_mb()
         with self.lock:
-            id_commit = commit(self.filename, query, (process_name, scheduled_time, free_mem), return_id=True)
+            id_commit = commit(self.filename, query, (process_id, scheduled_time, free_mem), return_id=True)
         return id_commit
 
     def update_process_status(self, finished_time, status, msg_error, row_id):

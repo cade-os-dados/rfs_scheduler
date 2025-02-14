@@ -18,3 +18,7 @@ Implementar um esquema mais fácil para lidar com o banco de dados, dado a grand
 # Ping server
 
 Criar testes e a GUI
+
+# Adaptar os tipos
+
+Agora mudamos o nome da coluna da tabela executed_processes para executed_id ao inves de process_id. Neste caso teremos que adaptar os nomes e os testes

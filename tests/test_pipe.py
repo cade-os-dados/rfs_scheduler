@@ -19,9 +19,9 @@ class TestPipeline(unittest.TestCase):
         testdir = os.path.join(self.cdir, 'integration/scripts/pipe')
         join = lambda path: os.path.join(testdir, path)
         pipe = [
-            LightProcess([self.python, join('add.py'), 'number2.txt'], 'add'),
-            LightProcess([self.python, join('subtract.py'), 'number2.txt'], 'sub'),
-            LightProcess([self.python, join('assertion.py'), 'number2.txt'], 'assertion')
+            LightProcess([self.python, join('add.py'), 'number2.txt'], 1),
+            LightProcess([self.python, join('subtract.py'), 'number2.txt'], 2),
+            LightProcess([self.python, join('assertion.py'), 'number2.txt'], 3)
         ]
         scheduler = Scheduler()
         scheduler.add_process(ProcessPipeline(pipe))

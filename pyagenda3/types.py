@@ -8,12 +8,12 @@ from pyagenda3 import timeops
 @dataclass
 class ProcessOnce:
     args: list
-    name: str
+    id: int
     schedule: datetime
 
     def __eq__(self, other):
         eq = 0
-        attrs = ['args', 'name', 'schedule']
+        attrs = ['args', 'id', 'schedule']
         for attr in attrs:
             eqattr: bool = getattr(self, attr) == getattr(other, attr)
             eq += eqattr
@@ -50,20 +50,20 @@ class TwiceMonthProcess(ProcessOnce):
 class Process:
     args: list
     cwd: str
-    name: str
+    id: int
     schedule: datetime
     interval: int
 
     def __eq__(self, other):
         eq = 0
-        attrs = ['args', 'name', 'schedule', 'interval']
+        attrs = ['args', 'id', 'schedule', 'interval']
         for attr in attrs:
             eqattr: bool = getattr(self, attr) == getattr(other, attr)
             eq += eqattr
         return eq == len(attrs)
     
     def run(self, database, **kwargs):
-        id = database.commit_process(self.name, self.schedule)
+        id = database.commit_process(self.id, self.schedule)
         result = subprocess.run(self.args, capture_output=True, text=True, cwd=self.cwd, **kwargs)
         status = database.check_status(result)
         database.update_process_status(datetime.now(), status, result.stderr, id)
@@ -82,7 +82,7 @@ class Process:
 @dataclass
 class LightProcess:
     args: list
-    name: str
+    id: int
 
 class ProcessPipeline:
 
@@ -94,7 +94,7 @@ class ProcessPipeline:
     
     def run(self, database):
         for process in self.pipe:
-            id = database.commit_process(process.name, self.schedule)
+            id = database.commit_process(process.id, self.schedule)
             result = subprocess.run(process.args, capture_output=True, text=True, timeout=self.timeout)
             status = database.check_status(result)
             database.update_process_status(datetime.now(), status, result.stderr, id)

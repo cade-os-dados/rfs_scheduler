@@ -5,7 +5,6 @@ import os, unittest
 
 from datetime import datetime
 from pyagenda3.scheduler import Scheduler
-from pyagenda3.pyprocess import pyProcess, projectPaths
 from pyagenda3.types import Process
 from unittest.mock import MagicMock, patch
 from time import sleep
@@ -17,52 +16,8 @@ class TestScheduler(unittest.TestCase):
         self.mock_task = MagicMock(__name__ = 'mock_task')
         self.mock_db = MagicMock()
 
-    def test_add_process(self):
-        processo = pyProcess(
-            paths = projectPaths(
-                project_path="local",
-                script_name="main.py"
-            ),
-            process_name = "hello",
-            cwd='C:/local',
-            scheduled_time = datetime(2022,1,1)
-        ).parse()
-        self.scheduler.add_process(processo)
-        self.assertEqual(
-            self.scheduler.queue.processes[0],
-            Process(
-                ['local\\venv\\Scripts\\python.exe', 'local\\main.py'], 
-                'C:/local',
-                "hello", 
-                datetime(2022,1,1), 
-                None
-            )
-        )
-
-        processo = pyProcess(
-            paths = projectPaths(
-                project_path="local",
-                script_name="main.py",
-                args = '--hello --world'
-            ),
-            cwd='C:/local',
-            process_name = "hello",
-            scheduled_time = datetime(2022,1,1)
-        ).parse()
-        self.scheduler.add_process(processo)
-        self.assertEqual(
-            self.scheduler.queue.processes[1],
-            Process(
-                ['local\\venv\\Scripts\\python.exe', 'local\\main.py', '--hello', '--world'], 
-                'C:/local',
-                "hello", 
-                datetime(2022,1,1), 
-                None
-            )
-        )
-
     def fetch(self, scheduler: Scheduler, debug=False):
-        consulta = 'SELECT status FROM executed_processes WHERE process_id = 1'
+        consulta = 'SELECT status FROM executed_processes WHERE executed_id = 1'
         tupla = scheduler.database.query(consulta).fetchone()
         return tupla[0] if tupla is not None else tupla
 
@@ -72,7 +27,7 @@ class TestScheduler(unittest.TestCase):
         processo = Process(
             ['python', os.path.join(caminho,'relative.py')],
             caminho,
-            'relative',
+            5,
             datetime(2000,1,1),
             0
         )

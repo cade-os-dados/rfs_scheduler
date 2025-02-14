@@ -196,10 +196,14 @@ class App(tk.Tk):
 
     def spawn_rcmenu(self):
         'right click menu'
+
+        get_process_id = lambda: int(self.on_treeview_select(None)[0])
+        # print('ID selecionado: ', int(get_process_id()[0]))
+
         self.rcmenu = tk.Menu(self.arvore, tearoff=0)
         self.rcmenu.add_command(label="Editar", command=self.edit_process)
         self.rcmenu.add_command(label="Novo", command=self.new_form)
-        self.rcmenu.add_command(label="Histórico", command=lambda: self.abrir_historico('add'))
+        self.rcmenu.add_command(label="Histórico", command=lambda: self.abrir_historico(get_process_id()))
         self.rcmenu.add_separator()
         self.rcmenu.add_command(label="Excluir", command=self.delete_process)
 
