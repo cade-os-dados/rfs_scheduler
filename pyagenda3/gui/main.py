@@ -194,16 +194,21 @@ class App(tk.Tk):
         # A Label widget to show in toplevel
         tk.Label(self.popup_window, text ="This is a new window").pack()
 
+    def rodar(self):
+        process_id = self.get_process_id()
+        if not self.db.waiting_or_running_process(process_id):
+            self.db.commit_process(process_id, datetime.now(), 'WAITING')
+
+    def get_process_id(self):
+        return int(self.on_treeview_select(None)[0])
+
     def spawn_rcmenu(self):
         'right click menu'
-
-        get_process_id = lambda: int(self.on_treeview_select(None)[0])
-        # print('ID selecionado: ', int(get_process_id()[0]))
-
         self.rcmenu = tk.Menu(self.arvore, tearoff=0)
         self.rcmenu.add_command(label="Editar", command=self.edit_process)
         self.rcmenu.add_command(label="Novo", command=self.new_form)
-        self.rcmenu.add_command(label="Histórico", command=lambda: self.abrir_historico(get_process_id()))
+        self.rcmenu.add_command(label="Rodar", command=self.rodar)
+        self.rcmenu.add_command(label="Histórico", command=self.abrir_historico)
         self.rcmenu.add_separator()
         self.rcmenu.add_command(label="Excluir", command=self.delete_process)
 

@@ -54,12 +54,17 @@ class schedulerDatabase:
         with self.lock:
             commit(self.filename, query, (task_name, scheduled_time, status))
     
-    def commit_process(self, process_id, scheduled_time):
+    def commit_process(self, process_id, scheduled_time, status='RUNNING'):
         query = self.handler.get('commit_process.sql')
         free_mem = self.check_memory_mb()
         with self.lock:
-            id_commit = commit(self.filename, query, (process_id, scheduled_time, free_mem), return_id=True)
+            id_commit = commit(self.filename, query, (process_id, scheduled_time, free_mem, status), return_id=True)
         return id_commit
+    
+    def waiting_or_running_process(self, process_id):
+        q = self.handler.get('waiting_or_running_process.sql')
+        n = self.query(q, (process_id, )).fetchone()[0]
+        return n > 0
 
     def update_process_status(self, finished_time, status, msg_error, row_id):
         query = self.handler.get('update_process_status.sql')
