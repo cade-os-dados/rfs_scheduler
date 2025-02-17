@@ -9,9 +9,11 @@ from pyagenda3.gui.centralize import toplevel_centralize, centralize_dimensions,
 from historico import abrir_historico
 from tkcalendar import DateEntry
 
+from forms import NewEditProcessForm
+
 from ping import *
 
-DEBUG = True
+DEBUG = False
 MINUTO = 60; HORA = 60*MINUTO; DIA = 24*HORA; SEMANA = 7*DIA;
 OPCOES_INTERVALO = ['12 horas', '1 dia', '1 semana']
 
@@ -107,53 +109,43 @@ class App(tk.Tk):
             return 
         def fmt_dtstr(dt_str: str, format='%d/%m/%Y'):
             return f"{dt_str[8:10]}/{dt_str[5:7]}/{dt_str[0:4]}"
+            
+        def edit_db(widget):
+            if not validar_data(widget.dt.get()):
+                messagebox.showerror("Entrada inválida", "Por favor, digite uma data no formato DIA/MES/ANO no campo de data.")
+            else:
+                intervalo = validar_intervalo(widget.i.get())
+                dt_ = datetime.strptime(widget.dt.get(),"%d/%m/%Y")
+                novos_dados = widget.nome.get(), widget.argumento.get(), widget.caminho.get(), dt_, intervalo
+                self.db.edit_process(self.edit_id, *novos_dados)
+                self.atualiza_processos()
+                widget.form.destroy()
+                self.update_treeview()
 
         dados = self.on_treeview_select(None)
         self.edit_id = dados[0]
 
-        self.edit = tk.Toplevel(self)
-        self.edit.transient(self)
-        self.edit.title("Editar")
-        spawn_on_mouse(self, self.edit, (300,160))
-        self.edit_frame1 = tk.Frame(self.edit, pady=5)
-        self.edit_frame2 = tk.Frame(self.edit, pady=5)
-        self.edit_frame1.pack()
-        self.edit_frame2.pack()
-    
-        self.nome = self.label_entry(self.edit_frame1, 'Nome', 0); set_text(self.nome, dados[1])
-        self.argumento = self.label_entry(self.edit_frame1, 'Argumento', 1); set_text(self.argumento, dados[2])
-        self.caminho = self.label_entry(self.edit_frame1, 'Caminho', 2); set_text(self.caminho, dados[3])
-        # date entry
-        tk.Label(self.edit_frame1, text='Data: ',width=10, anchor='w').grid(row=3,column=0)
-        self.dt=tk.StringVar(self)
-        DateEntry(self.edit_frame1,selectmode='day',textvariable=self.dt,locale='pt_br',width=22).grid(row=3,column=1)
-        self.dt.set(fmt_dtstr(dados[4]))
-        # interval
-        tk.Label(self.edit_frame1, text='Intervalo: ',width=10, anchor='w').grid(row=4,column=0)
-        self.i = ttk.Combobox(self.edit_frame1,values=OPCOES_INTERVALO, width=22)
-        self.i.grid(row=4,column=1); # set_text(self.i, secs_to_string(dados[5]))
-        new_data = secs_to_string(dados[5])
-        print(new_data)
-        self.i.set(new_data)
-        
-       
-        # self.i = self.label_entry(self.edit_frame1, 'Interval', 4); set_text(self.i, dados[5])
-        ok = tk.Button(self.edit_frame2, text='OK',command=self.edit_db,width=10)
-        ok.pack()
-        self.edit.focus_force()
+        edit = NewEditProcessForm(self, 'Editar', lambda: edit_db(edit))
 
-    def edit_db(self):
-        # Testando a função
-        if not validar_data(self.dt.get()):
-            messagebox.showerror("Entrada inválida", "Por favor, digite uma data no formato DIA/MES/ANO no campo de data.")
-        else:
-            intervalo = validar_intervalo(self.i.get())
-            dt_ = datetime.strptime(self.dt.get(),"%d/%m/%Y")
-            novos_dados = self.nome.get(), self.argumento.get(), self.caminho.get(), dt_, intervalo
-            self.db.edit_process(self.edit_id, *novos_dados)
-            self.atualiza_processos()
-            self.edit.destroy()
-            self.update_treeview()
+        set_text(edit.nome, dados[1]); set_text(edit.argumento, dados[2]); set_text(edit.caminho, dados[3])
+        edit.dt.set(fmt_dtstr(dados[4]))
+        edit.i.set(secs_to_string(dados[5]))
+
+    def new_form(self):
+        def valida(widget):
+            if not validar_data(widget.dt.get()):
+                messagebox.showerror("Entrada inválida", "Por favor, digite uma data no formato DIA/MES/ANO no campo de data.")
+            else:
+                intervalo = validar_intervalo(widget.i.get())
+                dt_ = datetime.strptime(widget.dt.get(),"%d/%m/%Y")
+                self.db.insert_process(widget.nome.get(), widget.argumento.get(), widget.caminho.get(), dt_, intervalo)
+                messagebox.showinfo('Sucesso!', 'Seu processo foi salvo com sucesso!')
+                if not messagebox.askyesno("Continuar?", "Deseja inserir mais processos?"):
+                    self.atualiza_processos()
+                    widget.form.destroy()
+                    self.update_treeview()
+
+        new = NewEditProcessForm(self, 'Novo Processo', lambda: valida(new))
 
     def delete_process(self):
         selected = self.arvore.selection()
@@ -166,67 +158,6 @@ class App(tk.Tk):
                     self.db.delete_process(item_text[0])
         else:
             messagebox.showwarning("Aviso", "Selecione um processo para deletar")
-
-    def label_entry(self, master, name: str, grid_row: int):
-        labelText=tk.StringVar()
-        labelText.set(name)
-        label = tk.Label(master, textvariable=labelText, width=10, anchor='w')
-        entry = tk.Entry(master, width=25)
-        label.grid(row=grid_row,column=0)
-        entry.grid(row=grid_row,column=1)
-        return entry
-
-    def valida(self):
-        # Testando a função
-        if not validar_data(self.dt_new.get()):
-            messagebox.showerror("Entrada inválida", "Por favor, digite uma data no formato DIA/MES/ANO no campo de data.")
-        else:
-            intervalo = validar_intervalo(self.i.get())
-            dt_ = datetime.strptime(self.dt_new.get(),"%d/%m/%Y")
-            self.db.insert_process(self.nome.get(), self.argumento.get(), self.caminho.get(), dt_, intervalo)
-            messagebox.showinfo('Sucesso!', 'Seu processo foi salvo com sucesso!')
-            if not messagebox.askyesno("Continuar?", "Deseja inserir mais processos?"):
-                self.atualiza_processos()
-                self.mpopup.destroy()
-                self.update_treeview()
-
-    def new_form(self):
-        self.mpopup = tk.Toplevel(self)
-        self.mpopup.transient(self)
-        self.mpopup.title("New Window")
-        self.mpopup_frame1 = tk.Frame(self.mpopup, pady=5)
-        self.mpopup_frame2 = tk.Frame(self.mpopup, pady=5)
-        self.mpopup_frame1.pack()
-        self.mpopup_frame2.pack()
-
-        # sets the geometry of toplevel
-        spawn_on_mouse(self, self.mpopup, dim = (300,180))
-    
-        # A Label widget to show in toplevel
-        self.nome = self.label_entry(self.mpopup_frame1, 'Nome', 0)
-        self.argumento = self.label_entry(self.mpopup_frame1, 'Argumento', 1)
-        self.caminho = self.label_entry(self.mpopup_frame1, 'Caminho', 2)
-        tk.Label(self.mpopup_frame1, text='Data: ',width=10, anchor='w').grid(row=3,column=0)
-        self.dt_new=tk.StringVar()
-        entry = DateEntry(self.mpopup_frame1,selectmode='day',textvariable=self.dt_new,locale='pt_br',width=22)
-        entry.grid(row=3,column=1); entry.delete(0,"end")
-        # self.i = self.label_entry(self.mpopup_frame1, 'Interval', 4)
-        tk.Label(self.mpopup_frame1, text='Intervalo: ',width=10, anchor='w').grid(row=4,column=0)
-        self.i = ttk.Combobox(self.mpopup_frame1,values=OPCOES_INTERVALO, width=22)
-        self.i.grid(row=4,column=1)
-        # self.i = self.label_entry(self.mpopup_frame1, 'Interval', 4)
-        ok = tk.Button(self.mpopup_frame2, text='OK',command=self.valida,width=10)
-        ok.pack()
-
-    def pop_up(self, event):
-        self.popup_window = tk.Toplevel(self)
-        self.popup_window.title("New Window")
-    
-        # sets the geometry of toplevel
-        self.popup_window.geometry("200x200")
-    
-        # A Label widget to show in toplevel
-        tk.Label(self.popup_window, text ="This is a new window").pack()
 
     def rodar(self):
         process_id = self.get_process_id()
@@ -285,7 +216,6 @@ class App(tk.Tk):
     
         self.arvore.pack(expand=True, fill=tk.Y)
         self.arvore.bind('<<TreeviewSelect>>', self.on_treeview_select)
-        self.arvore.bind('<Double-1>', self.pop_up)
         self.arvore.bind('<Button-3>', self.popup_rcmenu)
 
         display = cols[1:]
