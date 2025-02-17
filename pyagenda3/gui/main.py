@@ -5,17 +5,32 @@ from tkinter import messagebox
 from pyagenda3.database.ops import schedulerDatabase
 from datetime import datetime
 from pyagenda3.utils import relpath
-from pyagenda3.gui.centralize import toplevel_centralize, centralize_dimensions, spawn_on_mouse
-from historico import abrir_historico
-from tkcalendar import DateEntry
-
+from pyagenda3.gui.centralize import centralize_dimensions
+from historico import abrir_historico, status_to_emoji
+import re
 from forms import NewEditProcessForm
-
 from ping import *
 
 DEBUG = False
 MINUTO = 60; HORA = 60*MINUTO; DIA = 24*HORA; SEMANA = 7*DIA;
 OPCOES_INTERVALO = ['12 horas', '1 dia', '1 semana']
+REGEX = re.compile(r"(\d+)\s+segundos?")
+
+def apply_custom_style(active: bool):
+    # Customizando o estilo de seleção
+    style = ttk.Style()
+    if active:
+        foreground, background = 'white', "#3399FF"
+    else:
+        foreground, background = 'white', "red"
+    
+    style.map("Treeview", 
+            foreground=[('selected', foreground)],
+            background=[('selected', background)])  # Cor rosa choque para seleção
+
+def update_row_color(treeview, item_id, color):
+    treeview.tag_configure(color, background=color)
+    treeview.item(item_id, tags=(color,))
 
 def validar_data(data_str):
     formato ="%d/%m/%Y" # Formato de data :dia/mês/ano
@@ -36,19 +51,17 @@ def secs_to_string(dado):
         return '1 dia'
     if dado == SEMANA:
         return '1 semana'
-    else:
-        return dado
-
+    return '1 segundo'  if dado == 1 else f'{dado} segundos'
+            
 def validar_intervalo(entrada):
     if entrada == '12 horas':
-        entrada = 12*HORA
-    elif entrada == '1 dia':
-        entrada = DIA
-    else:
-        entrada = SEMANA
+        return 12*HORA
+    if entrada == '1 dia':
+        return DIA
+    if entrada == '1 semana':
+        return SEMANA   
     try:
-        numero = int(entrada)
-        return numero
+        return int(entrada)
     except ValueError:
         messagebox.showerror("Entrada inválida", "Por favor, digite um número inteiro no campo intervalo.")
         return False
@@ -86,6 +99,7 @@ class App(tk.Tk):
 
         self.show_servers()
         self.spawn_rcmenu()
+        self.spawn_activate_menu()
 
         # limitação de exibição do histórico
         self.limit_hist = tk.StringVar(self)
@@ -100,7 +114,30 @@ class App(tk.Tk):
         self.wm_iconphoto(True, photo)
 
     def atualiza_processos(self):
-        self.processes = self.db.query('SELECT * FROM scheduled_processes')
+        q = """
+            SELECT 
+                sp.process_id, process_name, args, cwd, 
+                sp.scheduled_time, interval, status, status_id
+            FROM scheduled_processes sp
+            LEFT JOIN (
+                SELECT * FROM
+                (SELECT process_id, status, scheduled_time,
+                    ROW_NUMBER() OVER (PARTITION BY process_id ORDER BY scheduled_time DESC) as rn
+                FROM executed_processes) subquery
+                WHERE rn = 1
+            ) status_table ON sp.process_id = status_table.process_id
+        """
+        self.processes = self.db.query(q).fetchall()
+        self.processes = list(map(lambda x: list(x), self.processes))
+        for linha in self.processes:
+            linha[-2] = status_to_emoji(linha[-2])
+            linha[-3] = secs_to_string(linha[-3])
+        print(self.processes)
+
+    def inativos(self):
+        for i, row in enumerate(self.processes):
+            if int(row[-1]) == 0:
+                update_row_color(self.arvore, self.arvore.get_children()[i], "#FFC0CB")
 
     def edit_process(self):
         def set_text(widget, text):
@@ -109,6 +146,11 @@ class App(tk.Tk):
             return 
         def fmt_dtstr(dt_str: str, format='%d/%m/%Y'):
             return f"{dt_str[8:10]}/{dt_str[5:7]}/{dt_str[0:4]}"
+        def tratar_intervalo(intervalo):
+            find = REGEX.findall(intervalo)
+            if find is not None and len(find) == 1:
+                intervalo = find[0]
+            return intervalo
             
         def edit_db(widget):
             if not validar_data(widget.dt.get()):
@@ -129,7 +171,7 @@ class App(tk.Tk):
 
         set_text(edit.nome, dados[1]); set_text(edit.argumento, dados[2]); set_text(edit.caminho, dados[3])
         edit.dt.set(fmt_dtstr(dados[4]))
-        edit.i.set(secs_to_string(dados[5]))
+        edit.i.set(tratar_intervalo(dados[5]))
 
     def new_form(self):
         def valida(widget):
@@ -174,19 +216,44 @@ class App(tk.Tk):
         self.rcmenu.add_command(label="Novo", command=self.new_form)
         self.rcmenu.add_command(label="Rodar", command=self.rodar)
         self.rcmenu.add_command(label="Histórico", command=self.abrir_historico)
+        self.rcmenu.add_command(label="Desativar", command=self.desativar)
         self.rcmenu.add_separator()
         self.rcmenu.add_command(label="Excluir", command=self.delete_process)
 
+    def ativar(self):
+        pass
+    def desativar(self):
+        pass
+    def get_process_status(self):
+        return int(self.on_treeview_select(None)[-1])
+
+    def spawn_activate_menu(self):
+        self.acmenu = tk.Menu(self.arvore, tearoff=0)
+        self.acmenu.add_command(label="Editar", command=self.edit_process)
+        self.acmenu.add_command(label="Novo", command=self.new_form)
+        self.acmenu.add_command(label="Rodar", command=self.rodar)
+        self.acmenu.add_command(label="Histórico", command=self.abrir_historico)
+        self.acmenu.add_command(label="Ativar", command=self.ativar)
+        self.acmenu.add_separator()
+        self.acmenu.add_command(label="Excluir", command=self.delete_process)
+
     def popup_rcmenu(self, event):
-        try:
-            self.rcmenu.tk_popup(event.x_root, event.y_root)
-        finally:
-            self.rcmenu.grab_release()
+        if self.get_process_status():
+            try:
+                self.rcmenu.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.rcmenu.grab_release()
+        else:
+            try:
+                self.acmenu.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.acmenu.grab_release()
 
     def on_treeview_select(self, event):
         selected_item = self.arvore.selection()
         item_text = self.arvore.item(selected_item, 'values')
         print(f"Linha selecionada: {item_text}, item: {selected_item}")
+        apply_custom_style(bool(int(item_text[-1])))
         return item_text
 
     def update_treeview(self):
@@ -195,13 +262,13 @@ class App(tk.Tk):
             self.arvore.delete(item)
         
         # Inserir novos itens
-        for i, linha in enumerate(self.processes):
+        for linha in self.processes:
             self.arvore.insert("", "end", values=linha)
     
     def make_treeview(self, master):
-        cols = [f'col{i}' for i in range(1,7)]
+        cols = [f'col{i}' for i in range(1,8)]
         self.arvore = ttk.Treeview(master, columns=cols, show="headings")
-        for col, name in zip(cols, ["id", "Nome", "Argumentos", "Caminho", "Data/Hora Agendamento", "Intervalo de Execuções (seg.)"]):
+        for col, name in zip(cols, ["id", "Nome", "Argumentos", "Caminho", "Data/Hora Agendamento", "Intervalo de Execuções", "Últimos Status"]):
             self.arvore.heading(col, text=name,anchor='center')
             self.arvore.column(col, anchor='center')
         
@@ -211,7 +278,7 @@ class App(tk.Tk):
         scrollbar_x.pack(side=tk.BOTTOM, fill=tk.X)
 
         # Insere os dados nas colunas
-        for i, linha in enumerate(self.processes):
+        for linha in self.processes:
             self.arvore.insert("", "end", values=linha)
     
         self.arvore.pack(expand=True, fill=tk.Y)
@@ -220,6 +287,7 @@ class App(tk.Tk):
 
         display = cols[1:]
         self.arvore["displaycolumns"] = display
+        self.inativos()
 
 App.list_ping_server = list_ping_server
 App.show_servers = show_servers

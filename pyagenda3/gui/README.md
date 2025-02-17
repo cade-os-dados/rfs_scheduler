@@ -1,6 +1,15 @@
-# Restart no agendador
+# Features mais complexas
 
-# Opção de dar kill no processo
+* Restart no agendador
+* Opção de dar kill no processo
+
+# Último Status
+
+Terá que criar uma tabela só para isso porque se não a consulta fica lenta e acaba tendo delay para o usuário
+
+# Processos ativos e inativos
+
+Processos inativos deixar em transparente e dar a opção para ativar
 
 # Rodar instantaneamente
 
@@ -19,10 +28,9 @@ Abstrair a atualização da treeview e utilizar em ambas as telas com treeview..
 
 Exigir senha para permitir o usuário editar algum processo e outra para o usuário rodar...
 
-# Intervalo em dias
-
-Adicionar opções de 1 dia, 0,5 dia, 1 semana, etc...
-
 # Servidores
 
 Editar os processos por servidor e exibir conforme o servidor selecionado
+
+# Diagramas
+https://app.diagrams.net/

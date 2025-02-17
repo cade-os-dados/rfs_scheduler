@@ -15,6 +15,19 @@ HIST_QUERY = """
 
 PROCESS_NAME = "SELECT process_name FROM scheduled_processes WHERE process_id = ?"
 
+def status_to_emoji(status):
+    if status == "COMPLETED":
+        status = "✅"
+    elif status == "FAILED":
+        status = "❌"
+    elif status == "WAITING":
+        status = "🕓" # 🕓 ⏳
+    elif status == "RUNNING":
+        status = "⭮" # ⏭️ ↺ ⭯ ⇄ ↻ ⭮ 💫 ↺↻⟲⟳⭯⭮↺↻⥀⥁↶↷⮌⮍⮎⮏⤻⤸⤾⤿⤺⤼⤽⤹🗘⮔⤶⤷⃕↻
+    else:
+        status = ""
+    return status
+
 class Historico:    
     def __init__(self,
         scheduled_time: str,
@@ -22,14 +35,15 @@ class Historico:
         status: str,
         msg_error: str
     ):
-        if status == "COMPLETED":
-            status = "✅"
-        elif status == "FAILED":
-            status = "❌"
-        elif status == "WAITING":
-            status = "🕓" # 🕓 ⏳
-        elif status == "RUNNING":
-            status = "⭮" # ⏭️ ↺ ⭯ ⇄ ↻ ⭮ 💫 ↺↻⟲⟳⭯⭮↺↻⥀⥁↶↷⮌⮍⮎⮏⤻⤸⤾⤿⤺⤼⤽⤹🗘⮔⤶⤷⃕↻
+    #     if status == "COMPLETED":
+    #         status = "✅"
+    #     elif status == "FAILED":
+    #         status = "❌"
+    #     elif status == "WAITING":
+    #         status = "🕓" # 🕓 ⏳
+    #     elif status == "RUNNING":
+    #         status = "⭮" # ⏭️ ↺ ⭯ ⇄ ↻ ⭮ 💫 ↺↻⟲⟳⭯⭮↺↻⥀⥁↶↷⮌⮍⮎⮏⤻⤸⤾⤿⤺⤼⤽⤹🗘⮔⤶⤷⃕↻
+        status = status_to_emoji(status)
         if type(msg_error) == str:
             msg_error = msg_error[:200]
         self.values = (scheduled_time[:19], duration, status, msg_error)
