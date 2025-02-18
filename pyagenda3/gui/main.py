@@ -11,8 +11,8 @@ import re
 from forms import NewEditProcessForm
 from ping import *
 
-DELAY_ATUALIZACAO = 50 # ms
-DEBUG = False
+DELAY_ATUALIZACAO = 500 # ms
+DEBUG = False; PRINT = False;
 MINUTO = 60; HORA = 60*MINUTO; DIA = 24*HORA; SEMANA = 7*DIA;
 OPCOES_INTERVALO = ['12 horas', '1 dia', '1 semana']
 REGEX = re.compile(r"(\d+)\s+segundos?")
@@ -257,7 +257,8 @@ class App(tk.Tk):
     def on_treeview_select(self, event):
         selected_item = self.arvore.selection()
         item_text = self.arvore.item(selected_item, 'values')
-        print(f"Linha selecionada: {item_text}, item: {selected_item}")
+        if PRINT:
+            print(f"Linha selecionada: {item_text}, item: {selected_item}")
         try:
             apply_custom_style(bool(int(item_text[-1])))
         except:
