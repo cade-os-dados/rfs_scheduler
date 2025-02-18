@@ -3,7 +3,7 @@ from tkinter import ttk
 from dataclasses import dataclass
 from pyagenda3.gui.centralize import spawn_on_mouse
 
-DELAY_ATUALIZACAO = 1000 # ms
+DELAY_ATUALIZACAO_HISTORICO = 900 # ms
 
 HIST_QUERY = """
     SELECT scheduled_time, strftime('%s', finished_time) - strftime('%s',scheduled_time) AS duration, status, msg_error
@@ -63,14 +63,21 @@ def atualizar_limite_treeview_historico(master, tree, process_id):
         item_id = tree.insert("", "end", values=hist.values)
         value_to_id[hist.values[0]] = item_id  # Mapeia o valor único para o novo ID
 
+    ignore = False
     # Restaurar a seleção com base nos valores únicos mapeados
     for value in selected_values:
         if value in value_to_id:
+            if not ignore:
+                focar = value_to_id[value]
+                ignore = True
             tree.selection_add(value_to_id[value])
+    
+    if ignore:
+        tree.focus(focar)
 
 def refresh_historico(master, tree, process_id):
     atualizar_limite_treeview_historico(master, tree, process_id)
-    tree.after(DELAY_ATUALIZACAO, lambda: refresh_historico(master, tree, process_id))
+    tree.after(DELAY_ATUALIZACAO_HISTORICO, lambda: refresh_historico(master, tree, process_id))
 
 def abrir_historico(self):
     process_id = self.get_process_id()
@@ -110,4 +117,4 @@ def abrir_historico(self):
 
     atualizar_limite_treeview_historico(self, tree, process_id)
     tree.pack(side=tk.LEFT)
-    tree.after(DELAY_ATUALIZACAO, lambda: refresh_historico(self,tree,process_id))
+    tree.after(DELAY_ATUALIZACAO_HISTORICO, lambda: refresh_historico(self,tree,process_id))

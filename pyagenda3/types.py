@@ -66,7 +66,7 @@ class Process:
         id = database.commit_process(self.id, self.schedule)
         result = subprocess.run(self.args, capture_output=True, text=True, cwd=self.cwd, **kwargs)
         status = database.check_status(result)
-        database.update_process_status(datetime.now(), status, result.stderr, id)
+        database.update_process_status(self.id, datetime.now(), status, result.stderr, id)
 
     def stop(self):
         return False if self.interval > 0 else True
@@ -97,7 +97,7 @@ class ProcessPipeline:
             id = database.commit_process(process.id, self.schedule)
             result = subprocess.run(process.args, capture_output=True, text=True, timeout=self.timeout)
             status = database.check_status(result)
-            database.update_process_status(datetime.now(), status, result.stderr, id)
+            database.update_process_status(process.id, datetime.now(), status, result.stderr, id)
 
     def stop(self):
         return not self.interval > 0

@@ -49,6 +49,12 @@ class schedulerDatabase:
             with self.lock:
                 execute(self.filename, query)
 
+    def setup_last_status(self):
+        q1 = self.handler.get('delete_last_status.sql')
+        q2 = self.handler.get('insert_last_status.sql')
+        with self.lock:
+            self.execute(q1); self.execute(q2)
+
     def commit_task(self, task_name, scheduled_time, status):
         query = self.handler.get('commit_task.sql')
         with self.lock:
@@ -56,9 +62,15 @@ class schedulerDatabase:
     
     def commit_process(self, process_id, scheduled_time, status='RUNNING'):
         query = self.handler.get('commit_process.sql')
+        q1 = self.handler.get('has_last_status.sql')
+        # has_last_status = int(self.query(q1, (process_id,)).fetchone()[0]) > 0
+        # sql = 'update_last_process_status.sql' if has_last_status else 'insert_last_process_status.sql'
+        sql = 'update_last_process_status.sql'
+        q2 = self.handler.get(sql)
         free_mem = self.check_memory_mb()
         with self.lock:
             id_commit = commit(self.filename, query, (process_id, scheduled_time, free_mem, status), return_id=True)
+            commit(self.filename, q2, (status, process_id,))
         return id_commit
     
     def waiting_or_running_process(self, process_id):
@@ -66,10 +78,12 @@ class schedulerDatabase:
         n = self.query(q, (process_id, )).fetchone()[0]
         return n > 0
 
-    def update_process_status(self, finished_time, status, msg_error, row_id):
+    def update_process_status(self, process_id, finished_time, status, msg_error, row_id):
         query = self.handler.get('update_process_status.sql')
+        q2 = self.handler.get('update_last_process_status.sql')
         with self.lock:
             commit(self.filename, query, (finished_time, status, msg_error, row_id))
+            commit(self.filename, q2, (status, process_id,))
 
     def check_status(self, output) -> str:
         return 'FAILED' if len(output.stderr) > 0 else 'COMPLETED'
@@ -91,11 +105,13 @@ class schedulerDatabase:
         for process in processes:
             treated.append(parse_tuple(process))
         return treated
-    
+
     def insert_process(self, process_name: str, args: str, cwd: str, scheduled_time: datetime, interval: int) -> bool:
         query = self.handler.get('insert_process.sql')
+        q2 = self.handler.get('insert_last_process_status.sql')
         with self.lock:
             id = commit(self.filename, query, (process_name, args, cwd, scheduled_time, interval, 1), return_id=True)
+            self.commit(q2, (id, None,))
         return id > 0
     
     def edit_process(self, process_id: int, process_name: str, args: str, cwd: str, scheduled_time: datetime, interval: int) -> bool:

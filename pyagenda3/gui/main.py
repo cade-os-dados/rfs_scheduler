@@ -11,6 +11,7 @@ import re
 from forms import NewEditProcessForm
 from ping import *
 
+DELAY_ATUALIZACAO = 50 # ms
 DEBUG = False
 MINUTO = 60; HORA = 60*MINUTO; DIA = 24*HORA; SEMANA = 7*DIA;
 OPCOES_INTERVALO = ['12 horas', '1 dia', '1 semana']
@@ -83,6 +84,7 @@ class App(tk.Tk):
         # fonte
         self.mainfont = font.Font(family='Helvetica',size=14, weight='bold')
         self.db = schedulerDatabase('scheduler.db')
+        self.db.setup_last_status()
         self.atualiza_processos()
                 
         self.taskbar_icon()
@@ -105,6 +107,8 @@ class App(tk.Tk):
         self.limit_hist = tk.StringVar(self)
         self.limit_hist.set("20")
 
+        self.refresh()
+
     def taskbar_icon(self):
         import ctypes
         # Change the taskbar icon
@@ -114,25 +118,20 @@ class App(tk.Tk):
         self.wm_iconphoto(True, photo)
 
     def atualiza_processos(self):
-        q = """
+        q2 = """
             SELECT 
                 sp.process_id, process_name, args, cwd, 
-                sp.scheduled_time, interval, status, status_id
+                sp.scheduled_time, interval, last_status status, status_id
             FROM scheduled_processes sp
-            LEFT JOIN (
-                SELECT * FROM
-                (SELECT process_id, status, scheduled_time,
-                    ROW_NUMBER() OVER (PARTITION BY process_id ORDER BY scheduled_time DESC) as rn
-                FROM executed_processes) subquery
-                WHERE rn = 1
-            ) status_table ON sp.process_id = status_table.process_id
+            LEFT JOIN last_status ON sp.process_id = last_status.process_id
         """
-        self.processes = self.db.query(q).fetchall()
+
+        self.processes = self.db.query(q2).fetchall()
         self.processes = list(map(lambda x: list(x), self.processes))
         for linha in self.processes:
             linha[-2] = status_to_emoji(linha[-2])
             linha[-3] = secs_to_string(linha[-3])
-        print(self.processes)
+        # print(self.processes)
 
     def inativos(self):
         for i, row in enumerate(self.processes):
@@ -221,9 +220,15 @@ class App(tk.Tk):
         self.rcmenu.add_command(label="Excluir", command=self.delete_process)
 
     def ativar(self):
-        pass
+        q = self.db.handler.get('update_process_status_id.sql')
+        print(q)
+        self.db.commit(q, (1, self.get_process_id(),))
+
     def desativar(self):
-        pass
+        q = self.db.handler.get('update_process_status_id.sql')
+        print(q)
+        self.db.commit(q, (0, self.get_process_id(),))
+
     def get_process_status(self):
         return int(self.on_treeview_select(None)[-1])
 
@@ -253,7 +258,10 @@ class App(tk.Tk):
         selected_item = self.arvore.selection()
         item_text = self.arvore.item(selected_item, 'values')
         print(f"Linha selecionada: {item_text}, item: {selected_item}")
-        apply_custom_style(bool(int(item_text[-1])))
+        try:
+            apply_custom_style(bool(int(item_text[-1])))
+        except:
+            pass
         return item_text
 
     def update_treeview(self):
@@ -264,7 +272,36 @@ class App(tk.Tk):
         # Inserir novos itens
         for linha in self.processes:
             self.arvore.insert("", "end", values=linha)
-    
+
+    def atualiza_treeview(self):
+        self.atualiza_processos()
+        # Salvar a seleção atual com base em um valor único (por exemplo, a primeira coluna)
+        selected_values = [self.arvore.item(item)["values"][0] for item in self.arvore.selection()]
+
+        # Deletar tudo
+        for item in self.arvore.get_children():
+            self.arvore.delete(item)
+        value_to_id = {}
+        for tupla in self.processes:
+            item_id = self.arvore.insert("", "end", values=tupla)
+            value_to_id[tupla[0]] = item_id  # Mapeia o valor único para o novo ID
+
+        ignore = False
+        # Restaurar a seleção com base nos valores únicos mapeados
+        for value in selected_values:
+            if value in value_to_id:
+                if not ignore:
+                    focar = value_to_id[value]
+                    ignore = True
+                self.arvore.selection_add(value_to_id[value])
+        if ignore:
+            self.arvore.focus(focar)
+        self.inativos()
+
+    def refresh(self):
+        self.atualiza_treeview()
+        self.arvore.after(DELAY_ATUALIZACAO, self.refresh)
+
     def make_treeview(self, master):
         cols = [f'col{i}' for i in range(1,8)]
         self.arvore = ttk.Treeview(master, columns=cols, show="headings")
