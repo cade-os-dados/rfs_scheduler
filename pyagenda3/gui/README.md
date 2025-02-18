@@ -1,11 +1,7 @@
 # Features mais complexas
 
 * Restart no agendador
-* Opção de dar kill no processo
-
-# Último Status
-
-Terá que criar uma tabela só para isso porque se não a consulta fica lenta e acaba tendo delay para o usuário
+* Opção de dar kill no processo (no subprocess tem como dar terminate e kill, basta implementar p/ o scheduler)
 
 # Rodar instantaneamente
 

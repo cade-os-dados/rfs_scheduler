@@ -19,6 +19,7 @@ class NewEditProcessForm:
         self.create_entries(); self.date_entry(); self.interval_entry()
         ok = tk.Button(self.frame2, text='OK',command=ok_button_function,width=10)
         ok.pack()
+        ok.bind('<Return>', ok_button_function)
         self.form.focus_force()
 
     def create_entries(self):

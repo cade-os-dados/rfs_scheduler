@@ -151,7 +151,7 @@ class App(tk.Tk):
                 intervalo = find[0]
             return intervalo
             
-        def edit_db(widget):
+        def edit_db(widget, event):
             if not validar_data(widget.dt.get()):
                 messagebox.showerror("Entrada inválida", "Por favor, digite uma data no formato DIA/MES/ANO no campo de data.")
             else:
@@ -166,14 +166,14 @@ class App(tk.Tk):
         dados = self.on_treeview_select(None)
         self.edit_id = dados[0]
 
-        edit = NewEditProcessForm(self, 'Editar', lambda: edit_db(edit))
+        edit = NewEditProcessForm(self, 'Editar', lambda e: edit_db(edit, e))
 
         set_text(edit.nome, dados[1]); set_text(edit.argumento, dados[2]); set_text(edit.caminho, dados[3])
         edit.dt.set(fmt_dtstr(dados[4]))
         edit.i.set(tratar_intervalo(dados[5]))
 
     def new_form(self):
-        def valida(widget):
+        def valida(widget, event):
             if not validar_data(widget.dt.get()):
                 messagebox.showerror("Entrada inválida", "Por favor, digite uma data no formato DIA/MES/ANO no campo de data.")
             else:
@@ -186,7 +186,7 @@ class App(tk.Tk):
                     widget.form.destroy()
                     self.update_treeview()
 
-        new = NewEditProcessForm(self, 'Novo Processo', lambda: valida(new))
+        new = NewEditProcessForm(self, 'Novo Processo', lambda e: valida(new, e))
 
     def delete_process(self):
         selected = self.arvore.selection()
