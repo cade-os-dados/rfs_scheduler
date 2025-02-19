@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 
 from pyagenda3.services.ping import PingClient
-from pyagenda3.gui.centralize import toplevel_centralize
+from pyagenda3.gui.features.centralize import toplevel_centralize
 
 def combobox_defocus(combobox: ttk.Combobox) -> None:
     def defocus(event):

@@ -5,7 +5,7 @@ from tkinter import messagebox
 from pyagenda3.database.ops import schedulerDatabase
 from datetime import datetime
 from pyagenda3.utils import relpath
-from pyagenda3.gui.centralize import centralize_dimensions
+from pyagenda3.gui.features.centralize import centralize_dimensions
 from historico import abrir_historico, status_to_emoji
 import re
 from forms import NewEditProcessForm

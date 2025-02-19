@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from dataclasses import dataclass
-from pyagenda3.gui.centralize import spawn_on_mouse
+from pyagenda3.gui.features.centralize import spawn_on_mouse
 
 DELAY_ATUALIZACAO_HISTORICO = 900 # ms
 

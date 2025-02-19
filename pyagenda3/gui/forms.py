@@ -2,13 +2,16 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from tkcalendar import DateEntry
-from pyagenda3.gui.centralize import spawn_on_mouse
+from pyagenda3.gui.features.centralize import spawn_on_mouse
+from pyagenda3.gui.features.hover import CreateToolTip
+from pyagenda3.gui.features.copy_paste import add_copy_and_paste_right_click
 
 OPCOES_INTERVALO = ['12 horas', '1 dia', '1 semana']
 
 class NewEditProcessForm:
 
     def __init__(self, master, title: str, ok_button_function, dims: tuple = (300, 160)):
+        self.master = master
         self.form = tk.Toplevel(master); 
         self.form.transient()
         self.form.title(title)
@@ -17,6 +20,7 @@ class NewEditProcessForm:
         self.frame2 = tk.Frame(self.form, pady=5)
         self.frame1.pack(); self.frame2.pack()
         self.create_entries(); self.date_entry(); self.interval_entry()
+        self.add_popups_caminho()
         ok = tk.Button(self.frame2, text='OK',width=10)
         ok.pack()
         ok.bind('<Button-1>', ok_button_function)
@@ -27,11 +31,14 @@ class NewEditProcessForm:
         self.nome = self.label_entry(self.frame1, 'Nome', 0)
         self.argumento = self.label_entry(self.frame1, 'Argumento', 1)
         self.caminho = self.label_entry(self.frame1, 'Caminho', 2)
-        self.caminho.bind("<Button-1>", self.browse_directory)
+        add_copy_and_paste_right_click(self.master, self.argumento)
+        add_copy_and_paste_right_click(self.master, self.caminho)
+        
+    def add_popups_caminho(self):
+        self.caminho.bind("<Double-1>", self.browse_directory)
         self.argumento.bind("<Tab>", self.browse_directory)
-        # self.caminho.bind("<FocusIn>", self.browse_directory)
-        # tk.Button(self.frame1, text='Selecionar', width=12, anchor='w', command=self.browse_directory, padx=5).grid(row=2, column=3)
-    
+        CreateToolTip(self.caminho, "Clique duas vezes para abrir a seleção de arquivos")
+
     def browse_directory(self, event):
         directory = filedialog.askdirectory(parent=self.form)
         self.form.deiconify()

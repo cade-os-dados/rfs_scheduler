@@ -3,6 +3,11 @@
 * Restart no agendador
 * Opção de dar kill no processo (no subprocess tem como dar terminate e kill, basta implementar p/ o scheduler)
 
+# Refresh treeview
+
+Adicionar uma API unificada. Deixá-la mais inteligente, apenas excluindo informações que não constam mais,
+incluindo informações que não constam e atualizando informações que já constam (caso necessário) 
+
 # Rodar instantaneamente
 
 Opção de mandar rodar o processo instantaneamente. Exigir uma senha para realizar esta função.
