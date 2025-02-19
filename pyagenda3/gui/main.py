@@ -10,8 +10,9 @@ from historico import abrir_historico, status_to_emoji
 import re
 from forms import NewEditProcessForm
 from ping import *
+from pyagenda3.gui.features.treeview_refresh import TreeViewRefresher
 
-DELAY_ATUALIZACAO = 500 # ms
+DELAY_ATUALIZACAO = 50 # ms
 DEBUG = False; PRINT = False;
 MINUTO = 60; HORA = 60*MINUTO; DIA = 24*HORA; SEMANA = 7*DIA;
 OPCOES_INTERVALO = ['12 horas', '1 dia', '1 semana']
@@ -106,8 +107,10 @@ class App(tk.Tk):
         # limitação de exibição do histórico
         self.limit_hist = tk.StringVar(self)
         self.limit_hist.set("20")
-
-        self.refresh()
+        
+        refresh = TreeViewRefresher(self.arvore, 300)
+        refresh.run(lambda: self.atualiza_processos())
+        self.refresh_color()
 
     def taskbar_icon(self):
         import ctypes
@@ -132,11 +135,15 @@ class App(tk.Tk):
             linha[-2] = status_to_emoji(linha[-2])
             linha[-3] = secs_to_string(linha[-3])
         # print(self.processes)
+        return self.processes
 
     def inativos(self):
         for i, row in enumerate(self.processes):
-            if int(row[-1]) == 0:
-                update_row_color(self.arvore, self.arvore.get_children()[i], "#FFC0CB")
+            color = "#FFC0CB" if int(row[-1]) == 0 else "white"
+            try:    
+                update_row_color(self.arvore, self.arvore.get_children()[i], color)
+            except:
+                pass
 
     def edit_process(self):
         def set_text(widget, text):
@@ -159,9 +166,7 @@ class App(tk.Tk):
                 dt_ = datetime.strptime(widget.dt.get(),"%d/%m/%Y")
                 novos_dados = widget.nome.get(), widget.argumento.get(), widget.caminho.get(), dt_, intervalo
                 self.db.edit_process(self.edit_id, *novos_dados)
-                self.atualiza_processos()
                 widget.form.destroy()
-                self.update_treeview()
 
         dados = self.on_treeview_select(None)
         self.edit_id = dados[0]
@@ -182,9 +187,7 @@ class App(tk.Tk):
                 self.db.insert_process(widget.nome.get(), widget.argumento.get(), widget.caminho.get(), dt_, intervalo)
                 messagebox.showinfo('Sucesso!', 'Seu processo foi salvo com sucesso!')
                 if not messagebox.askyesno("Continuar?", "Deseja inserir mais processos?"):
-                    self.atualiza_processos()
                     widget.form.destroy()
-                    self.update_treeview()
 
         new = NewEditProcessForm(self, 'Novo Processo', lambda e: valida(new, e))
 
@@ -221,12 +224,10 @@ class App(tk.Tk):
 
     def ativar(self):
         q = self.db.handler.get('update_process_status_id.sql')
-        print(q)
         self.db.commit(q, (1, self.get_process_id(),))
 
     def desativar(self):
         q = self.db.handler.get('update_process_status_id.sql')
-        print(q)
         self.db.commit(q, (0, self.get_process_id(),))
 
     def get_process_status(self):
@@ -265,43 +266,10 @@ class App(tk.Tk):
             pass
         return item_text
 
-    def update_treeview(self):
-        # Remover todos os itens existentes
-        for item in self.arvore.get_children():
-            self.arvore.delete(item)
-        
-        # Inserir novos itens
-        for linha in self.processes:
-            self.arvore.insert("", "end", values=linha)
-
-    def atualiza_treeview(self):
-        self.atualiza_processos()
-        # Salvar a seleção atual com base em um valor único (por exemplo, a primeira coluna)
-        selected_values = [self.arvore.item(item)["values"][0] for item in self.arvore.selection()]
-
-        # Deletar tudo
-        for item in self.arvore.get_children():
-            self.arvore.delete(item)
-        value_to_id = {}
-        for tupla in self.processes:
-            item_id = self.arvore.insert("", "end", values=tupla)
-            value_to_id[tupla[0]] = item_id  # Mapeia o valor único para o novo ID
-
-        ignore = False
-        # Restaurar a seleção com base nos valores únicos mapeados
-        for value in selected_values:
-            if value in value_to_id:
-                if not ignore:
-                    focar = value_to_id[value]
-                    ignore = True
-                self.arvore.selection_add(value_to_id[value])
-        if ignore:
-            self.arvore.focus(focar)
+    def refresh_color(self):
         self.inativos()
-
-    def refresh(self):
-        self.atualiza_treeview()
-        self.arvore.after(DELAY_ATUALIZACAO, self.refresh)
+        self.on_treeview_select(None)
+        self.arvore.after(DELAY_ATUALIZACAO, self.refresh_color)
 
     def make_treeview(self, master):
         cols = [f'col{i}' for i in range(1,8)]
