@@ -3,4 +3,4 @@ SELECT
 FROM 
     scheduled_processes 
 WHERE 
-    status_id = 1
+    process_id IN ({})

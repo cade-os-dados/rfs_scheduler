@@ -25,6 +25,10 @@ def commit(db_filename, command, argument, return_id = False):
         if return_id:
             return cursor.lastrowid
 
+def col_as_tuple(col: tuple) -> tuple:
+    'For queries that select only one column and you want to receive the entire col as a tuple in python'
+    return tuple([row[0] for row in col])
+
 class schedulerDatabase:
 
     def __init__(self, filename):
