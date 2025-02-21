@@ -16,9 +16,10 @@ class SQLFileHandler:
             data = f.read()
         return data
 
-    def get(self, sql_filename: str):
+    def get(self, sql_filename: str, in_: int = -1):
         file = self.__join__(sql_filename)
-        return self.open(file) if os.path.exists(file) else None
+        opened_file = self.open(file) if os.path.exists(file) else None
+        return opened_file if not in_ >= 0 else opened_file.format(','.join('?' for _ in range(in_)))
     
     def list_all(self, pattern='*.sql'):
         return glob(os.path.join(self.dir, pattern))

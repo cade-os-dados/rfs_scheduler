@@ -19,6 +19,10 @@ Implementar um esquema mais fácil para lidar com o banco de dados, dado a grand
 
 Criar testes e a GUI
 
-# Adaptar os tipos
+# Argumentos Incorretos
 
-Agora mudamos o nome da coluna da tabela executed_processes para executed_id ao inves de process_id. Neste caso teremos que adaptar os nomes e os testes
+Tratar a exceção para quando o subprocess falha por conta dos argumentos...
+
+# Processos Instantâneos
+
+Precisamos adaptar o scheduler para quando rodamos um processo instantâneo, ele priorizar o processo instantâneo em detrimento do agendado. Neste caso talvez precisaremos utilizar eventos para comunicação entre as threads e talvez devemos adaptar o status do Scheduler Core para suportar running, waiting e stoped, algo do tipo, não só running True ou False. E com base no status modular o seu comportamento...

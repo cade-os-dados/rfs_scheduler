@@ -12,7 +12,7 @@ HIST_QUERY = """
     FROM executed_processes 
     WHERE process_id = ? 
     ORDER BY scheduled_time ASC
-    LIMIT ?
+    -- LIMIT ?
 """
 
 PROCESS_NAME = "SELECT process_name FROM scheduled_processes WHERE process_id = ?"
@@ -43,7 +43,8 @@ class Historico:
         self.values = (scheduled_time[:19], duration, status, msg_error)
 
 def dados_historico(master, process_id):
-    last_processes = master.db.query(HIST_QUERY, (process_id, master.limit_hist.get(), ))
+    #last_processes = master.db.query(HIST_QUERY, (process_id, master.limit_hist.get(), ))
+    last_processes = master.db.query(HIST_QUERY, (process_id, ))
     new_values = []
     for tupla in last_processes:
         hist = Historico(*tupla)
@@ -82,16 +83,14 @@ def abrir_historico(self):
     tree.configure(yscrollcommand=scrollbar_y.set)
     scrollbar_y.pack(side=tk.RIGHT,fill=tk.Y)
 
-    # atualizar_limite_treeview_historico(self, tree, process_id)
     tree.pack(side=tk.LEFT)
-    # tree.after(DELAY_ATUALIZACAO_HISTORICO, lambda: refresh_historico(self,tree,process_id))
-
     hider = TreeviewHider(tree, self.limit_hist)
-
+   
     ttk.Button(
         frame_child2, text='aplicar',
-        command=lambda: hider.hide_rows()# hide_rows(tree,self.limit_hist)
+        command=lambda: hider.hide_rows()
     ).pack(side=tk.LEFT, padx=10)
 
     refresh = TreeViewRefresher(tree, 300, False)
     refresh.run(lambda: dados_historico(self, process_id))
+    hider.hide_rows()

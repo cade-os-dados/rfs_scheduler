@@ -81,6 +81,10 @@ class schedulerDatabase:
         q = self.handler.get('waiting_or_running_process.sql')
         n = self.query(q, (process_id, )).fetchone()[0]
         return n > 0
+    
+    def get_execution_id_from_waiting_process(self, process_id):
+        q = self.handler.get('select_execution_id_waiting_process.sql')
+        return self.query(q, (process_id,) ).fetchone()[0]
 
     def update_process_status(self, process_id, finished_time, status, msg_error, row_id):
         query = self.handler.get('update_process_status.sql')

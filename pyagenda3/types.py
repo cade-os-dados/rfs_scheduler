@@ -124,3 +124,38 @@ class ProcessQueue:
     def append(self, process):
         self.processes.append(process)
         self.processes.sort(key=self.__time__)
+
+
+@dataclass
+class InstantaneousProcess:
+    args: list
+    cwd: str
+    id: int
+    schedule: datetime
+    interval: int
+
+    def __eq__(self, other):
+        eq = 0
+        attrs = ['args', 'id', 'schedule', 'interval']
+        for attr in attrs:
+            eqattr: bool = getattr(self, attr) == getattr(other, attr)
+            eq += eqattr
+        return eq == len(attrs)
+    
+    def run(self, database, **kwargs):
+        id = database.get_execution_id_from_waiting_process(self.id)
+        database.update_process_status(self.id, datetime.now(), 'RUNNING', '', id)
+        result = subprocess.run(self.args, capture_output=True, text=True, cwd=self.cwd, **kwargs)
+        status = database.check_status(result)
+        database.update_process_status(self.id, datetime.now(), status, result.stderr, id)
+
+    def stop(self):
+        return False if self.interval > 0 else True
+
+    def next(self):
+        if self.interval > 0:
+            new_schedule = self.schedule
+            while new_schedule < datetime.now():
+                new_schedule = timeops.calculate_next_period(new_schedule, self.interval)
+            self.schedule = new_schedule
+            return self

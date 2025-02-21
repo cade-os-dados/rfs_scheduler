@@ -20,6 +20,7 @@ class PingService:
         self.thread = threading.Thread(target=self.run)
         self.interval = interval
         self.setup()
+        self.running = True
         
     def setup(self):
         server = self.db.query('SELECT COUNT(*) FROM ping_server WHERE server_ip = ?', (self.ip,)).fetchone()
@@ -35,7 +36,7 @@ class PingService:
             self.db.commit(self.handler.get('update_ping_server.sql'), ('ACTIVE', self.db.check_memory_mb(), self.ip, ))
 
     def run(self):
-        while True:
+        while self.running:
             print('Cheking...')
             self.check_ping()
             sleep(self.interval)
