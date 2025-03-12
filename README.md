@@ -17,12 +17,16 @@ Implementar um esquema mais fácil para lidar com o banco de dados, dado a grand
 
 # Ping server
 
-Criar testes e a GUI
+Criar testes
 
 # Argumentos Incorretos
 
 Tratar a exceção para quando o subprocess falha por conta dos argumentos...
 
-# Processos Instantâneos
+# Processos por servidor
 
-Precisamos adaptar o scheduler para quando rodamos um processo instantâneo, ele priorizar o processo instantâneo em detrimento do agendado. Neste caso talvez precisaremos utilizar eventos para comunicação entre as threads e talvez devemos adaptar o status do Scheduler Core para suportar running, waiting e stoped, algo do tipo, não só running True ou False. E com base no status modular o seu comportamento...
+Separar cada processo por servidor para evitar conflitos
+
+# JSON Processos Agendados
+
+Para facilitar na questão do backup, ou migração dos processos agendados para um novo banco de dados...
