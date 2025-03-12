@@ -92,7 +92,13 @@ def tuples_to_process(tuples, instantaneous=False):
 class InfinityScheduler(Scheduler):
     def __init__(self):
         super().__init__()
+        self.debug = False
     
+    def debug_off(self):
+        self.debug = False
+    def debug_on(self):
+        self.debug = True
+
     def get_scheduled_processes(self):
         # returns
         # args, cwd, process_id, scheduled_time,interval
@@ -122,7 +128,7 @@ class InfinityScheduler(Scheduler):
         self.add_all(tuples_to_process(novos_tuplas))
         self.ids -= removidos
 
-        if self.queue.processes:
+        if self.queue.processes and self.debug:
             print('Listagem de Processos:')
             for _ in self.queue.processes:
                 print(_)
@@ -142,7 +148,7 @@ class InfinityScheduler(Scheduler):
         self.instantaneous_ids -= remove_ids
         q = self.database.handler.get('select_waiting_process.sql', in_ = len(novos))
         result = self.database.query(q, tuple(novos)).fetchall()
-        if result:
+        if result and self.debug:
             print('Instantaneous process:')
             for _ in result:
                 print(_)
