@@ -48,14 +48,28 @@ class NewEditProcessForm:
             self.caminho.insert(0, directory)
         
     def date_entry(self):
-        tk.Label(self.frame1, text='Data: ',width=10, anchor='w').grid(row=3,column=0)
+        tk.Label(self.frame1, text='Data/Hora: ',width=10, anchor='w').grid(row=3,column=0)
+        datehour_frame = tk.Frame(self.frame1)
+        datehour_frame.grid(row=3,column=1)
+
         self.dt = tk.StringVar(self.form)
-        DateEntry(self.frame1, selectmode='day',textvariable=self.dt, locale='pt_br', width=22).grid(row=3,column=1)
+        DateEntry(datehour_frame, selectmode='day',textvariable=self.dt, locale='pt_br', width=11).pack(side=tk.LEFT)# .grid(row=3,column=1)
+        self.hour = tk.StringVar(self.form)
+
+        time_entry = tk.Entry(datehour_frame, textvariable=self.hour, width=10, justify='center')
+        time_entry.pack(side=tk.LEFT)
+        
+        # https://stackoverflow.com/questions/5446553/tkinter-entry-character-limit
+        def character_limit(entry_text):
+            if len(entry_text.get()) > 0:
+                entry_text.set(entry_text.get()[:5])
+
+        self.hour.trace_add("write", lambda *args: character_limit(self.hour))
 
     def interval_entry(self):
-        tk.Label(self.frame1, text='Intervalo: ',width=10, anchor='w').grid(row=4,column=0)
+        tk.Label(self.frame1, text='Intervalo: ',width=10, anchor='w').grid(row=5,column=0)
         self.i = ttk.Combobox(self.frame1,values=OPCOES_INTERVALO, width=22)
-        self.i.grid(row=4,column=1)
+        self.i.grid(row=5,column=1)
 
     def label_entry(self, master, name: str, grid_row: int):
         labelText=tk.StringVar()

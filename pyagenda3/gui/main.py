@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import font
 from tkinter import messagebox
 from pyagenda3.database.ops import schedulerDatabase
-from datetime import datetime
+from datetime import datetime, timedelta
 from pyagenda3.utils import relpath
 from pyagenda3.gui.features.centralize import centralize_dimensions
 from historico import abrir_historico, status_to_emoji
@@ -33,6 +33,13 @@ def apply_custom_style(active: bool):
 def update_row_color(treeview, item_id, color):
     treeview.tag_configure(color, background=color)
     treeview.item(item_id, tags=(color,))
+
+def validar_hora(hora_str):
+    import re
+    if not hora_str:  # Permitir campo vazio
+        return True
+    pattern = r"^[0-5][0-9]:[0-5][0-9]$"  # Regex para HH:MM
+    return re.match(pattern, hora_str) is not None
 
 def validar_data(data_str):
     formato ="%d/%m/%Y" # Formato de data :dia/mês/ano
@@ -152,18 +159,22 @@ class App(tk.Tk):
             return 
         def fmt_dtstr(dt_str: str, format='%d/%m/%Y'):
             return f"{dt_str[8:10]}/{dt_str[5:7]}/{dt_str[0:4]}"
+        def fmt_hour(dt_str: str):
+            return f"{dt_str[11:13]}:{dt_str[14:16]}"
         def tratar_intervalo(intervalo):
             find = REGEX.findall(intervalo)
             if find is not None and len(find) == 1:
                 intervalo = find[0]
             return intervalo
-            
+        
         def edit_db(widget, event):
             if not validar_data(widget.dt.get()):
                 messagebox.showerror("Entrada inválida", "Por favor, digite uma data no formato DIA/MES/ANO no campo de data.")
             else:
                 intervalo = validar_intervalo(widget.i.get())
-                dt_ = datetime.strptime(widget.dt.get(),"%d/%m/%Y")
+                hour, minute = tuple(map(lambda x: int(x), widget.hour.get().split(':')))
+                dt_ = datetime.strptime(widget.dt.get(),"%d/%m/%Y") + timedelta(hours=hour, minutes=minute)
+                # dt_ = datetime.strptime(widget.dt.get(),"%d/%m/%Y")
                 novos_dados = widget.nome.get(), widget.argumento.get(), widget.caminho.get(), dt_, intervalo
                 self.db.edit_process(self.edit_id, *novos_dados)
                 widget.form.destroy()
@@ -175,15 +186,19 @@ class App(tk.Tk):
 
         set_text(edit.nome, dados[1]); set_text(edit.argumento, dados[2]); set_text(edit.caminho, dados[3])
         edit.dt.set(fmt_dtstr(dados[4]))
+        edit.hour.set(fmt_hour(dados[4]))
         edit.i.set(tratar_intervalo(dados[5]))
 
     def new_form(self):
         def valida(widget, event):
             if not validar_data(widget.dt.get()):
                 messagebox.showerror("Entrada inválida", "Por favor, digite uma data no formato DIA/MES/ANO no campo de data.")
+            elif not validar_hora(widget.hour.get()):
+                messagebox.showerror("Entrada inválida", "Por favor, digite uma hora no formato HORA:MINUTO no campo de hora.")
             else:
                 intervalo = validar_intervalo(widget.i.get())
-                dt_ = datetime.strptime(widget.dt.get(),"%d/%m/%Y")
+                hour, minute = tuple(map(lambda x: int(x), widget.hour.get().split(':')))
+                dt_ = datetime.strptime(widget.dt.get(),"%d/%m/%Y") + timedelta(hours=hour, minutes=minute)
                 self.db.insert_process(widget.nome.get(), widget.argumento.get(), widget.caminho.get(), dt_, intervalo)
                 messagebox.showinfo('Sucesso!', 'Seu processo foi salvo com sucesso!')
                 if not messagebox.askyesno("Continuar?", "Deseja inserir mais processos?"):
