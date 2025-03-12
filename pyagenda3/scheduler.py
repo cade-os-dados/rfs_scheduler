@@ -1,5 +1,4 @@
-import time
-import threading
+import os, time, threading
 from datetime import datetime
 
 from pyagenda3.database.ops import schedulerDatabase
@@ -75,7 +74,11 @@ def tuples_to_process(tuples, instantaneous=False):
     processes = []
     for item in tuples:
         item = list(item)
-        item[0] = item[0].split(' ') # "python -m unittest discover" => ['python', '-m', 'unittest','discover']
+        if not 'python' in item[0]:
+            python_venv = os.path.join(item[1], 'venv\Scripts\python')
+            item[0] = [python_venv, item[0].strip()]
+        else:
+            item[0] = item[0].split(' ') # "python -m unittest discover" => ['python', '-m', 'unittest','discover']
         formato = '%Y-%m-%d %H:%M:%S'
         formato += '.%f' if len(item[3]) > 19 else ''
         item[3] = datetime.strptime(item[3], formato)
@@ -91,6 +94,9 @@ class InfinityScheduler(Scheduler):
         super().__init__()
     
     def get_scheduled_processes(self):
+        # returns
+        # args, cwd, process_id, scheduled_time,interval
+        # per tuple
         active = self.database.handler.get('select_active_process.sql')
         active = self.database.query(active).fetchall()
         return tuples_to_process(active)
