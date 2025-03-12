@@ -10,35 +10,61 @@ from pyagenda3.services.ping import PingService
 
 class Scheduler:
 
-    def __init__(self,db_filename="scheduler.db"):
+    def __init__(self,db_filename="scheduler.db", delay_in_seconds: float = 0.5):
         self.queue = ProcessQueue()
         self.lock = threading.Lock()
         self.database = schedulerDatabase(db_filename)
         self.database.setup()
         self.running = True
+        self.current_process = None
+        self.delay_in_seconds = delay_in_seconds
 
     def add_process(self, process: Process):
         with self.lock:
             self.queue.append(process)
     
-    def run(self):
-        
-        while self.queue.processes and self.running:
-            print(threading.active_count())
-            current_time = datetime.now()
+    def update_current_process(self):
+        if not self.current_process:
             with self.lock:
-                process = self.queue.pop(0)
+                self.current_process = self.queue.pop(0)
+        elif self.queue.processes:
+            # checa se foi inserido algum processo
+            # e se o processo inserido tem que rodar antes do processo atual
+            if self.current_process.schedule > self.queue.processes[0].schedule:
+                print('New process added, changing priority...')
+                self.add_process(self.current_process)
+                with self.lock:
+                    self.current_process = self.queue.pop(0)
+        
+    def is_time_to_run(self) -> bool:
+        if self.current_process:
+            return datetime.now() >= self.current_process.schedule
+        return False
+
+    def run(self):
+        print('Running...')
+        while self.queue.processes and self.running:
+            print('Running next process...')
+            while not self.is_time_to_run():
+                if not self.running:
+                    break
+                time.sleep(self.delay_in_seconds)
+                self.update_current_process()
+
+            if self.running:
+                thread = threading.Thread(target=self.current_process.run, args=(self.database,))
+                thread.start()
             
-            if current_time < process.schedule:
-                sleep_time = (process.schedule - current_time).total_seconds()
-                time.sleep(sleep_time)
-            thread = threading.Thread(target=process.run, args=(self.database,))
-            thread.start()
-            if not process.stop():
-                process = process.next()
-                self.add_process(process)
-            thread.join()
-        print(threading.active_count())
+                if not self.current_process.stop():
+                    print('Adding Proces...')
+                    next_process = self.current_process.next()
+                    self.add_process(next_process)
+                else:
+                    # Reseta o processo atual após execução
+                    with self.lock:
+                        self.current_process = None
+                thread.join()
+                print(threading.active_count())
 
 # 1 thread para incluir/remover os processos inclusos/ativados/excluidos/desativados
 # tem que atualizar também caso haja alguma diferença
@@ -90,9 +116,10 @@ class InfinityScheduler(Scheduler):
         self.add_all(tuples_to_process(novos_tuplas))
         self.ids -= removidos
 
-        print('Listagem de Processos:')
-        for _ in self.queue.processes:
-            print(_)
+        if self.queue.processes:
+            print('Listagem de Processos:')
+            for _ in self.queue.processes:
+                print(_)
     
     def add_all(self, processes, instantaneous = False):
         for process in processes:
@@ -109,9 +136,10 @@ class InfinityScheduler(Scheduler):
         self.instantaneous_ids -= remove_ids
         q = self.database.handler.get('select_waiting_process.sql', in_ = len(novos))
         result = self.database.query(q, tuple(novos)).fetchall()
-        print('Instantaneous process:')
-        for _ in result:
-            print(_)
+        if result:
+            print('Instantaneous process:')
+            for _ in result:
+                print(_)
         self.add_all(tuples_to_process(result, True), True)
 
     def mainloop(self):
