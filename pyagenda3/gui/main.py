@@ -1,15 +1,16 @@
+import re
 import tkinter as tk
 from tkinter import ttk
 from tkinter import font
 from tkinter import messagebox
-from pyagenda3.database.ops import schedulerDatabase
 from datetime import datetime, timedelta
+
+from pyagenda3.gui.ping import *
 from pyagenda3.utils import relpath
+from pyagenda3.gui.forms import NewEditProcessForm
+from pyagenda3.database.ops import schedulerDatabase
 from pyagenda3.gui.features.centralize import centralize_dimensions
-from historico import abrir_historico, status_to_emoji
-import re
-from forms import NewEditProcessForm
-from ping import *
+from pyagenda3.gui.historico import abrir_historico, status_to_emoji
 from pyagenda3.gui.features.treeview_refresh import TreeViewRefresher
 
 DELAY_ATUALIZACAO = 50 # ms
@@ -269,6 +270,16 @@ class App(tk.Tk):
                 self.acmenu.tk_popup(event.x_root, event.y_root)
             finally:
                 self.acmenu.grab_release()
+    def popup_right_click(self, event):
+        try:
+            self.popup_rcmenu(event)
+        except IndexError:
+            self.newmenu = tk.Menu(self.mainframe, tearoff=0)
+            self.newmenu.add_command(label="Novo", command=self.new_form)
+            try:
+                self.newmenu.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.newmenu.grab_release()
 
     def on_treeview_select(self, event):
         selected_item = self.arvore.selection()
@@ -304,7 +315,7 @@ class App(tk.Tk):
     
         self.arvore.pack(expand=True, fill=tk.Y)
         self.arvore.bind('<<TreeviewSelect>>', self.on_treeview_select)
-        self.arvore.bind('<Button-3>', self.popup_rcmenu)
+        self.arvore.bind('<Button-3>', self.popup_right_click)
 
         display = cols[1:]
         self.arvore["displaycolumns"] = display
