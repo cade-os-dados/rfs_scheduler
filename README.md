@@ -1,15 +1,47 @@
-# Working on
+# Usage
 
-## Módulo Pipeline
+## Server
+```python
+from pyagenda3.scheduler import InfinityScheduler
 
-Vamos modificar a api do Scheduler para ficar o mais agnóstico possível. 
+sc = InfinityScheduler()
+sc.mainloop()
+```
+## Client
+```python
+from pyagenda3.gui.main import App
 
-Para isto, temos que desatrelar as funções de database da thread main e jogar a cargo das classes de processo dentro do run.
+app = App()
+app.mainloop()
+```
 
-## Migrate to Poetry
+# Features para Implementar
 
-Better to integrate and install
+# Ideias Futuras
+Verificar a necessidade futuramente
 
-# Further
+## ORM
 
-Deixar as queries do database separadas em um arquivo a parte
+Implementar um esquema mais fácil para lidar com o banco de dados, dado a grande quantidade de migrations/queries do banco...
+
+# Importantes
+# Ping server
+
+Criar testes
+
+# Argumentos Incorretos
+
+Tratar a exceção para quando o subprocess falha por conta dos argumentos...
+
+# Processos por servidor
+
+Separar cada processo por servidor para evitar conflitos
+
+# JSON Processos Agendados
+
+Para facilitar na questão do backup, ou migração dos processos agendados para um novo banco de dados...
+
+# Horário de Agendamento
+
+Na tabela de processos executados utiliza-se o mesmo valor do scheduled_time. Poderíamos utilizar um novo
+nome executed_time e inserir somente a data/hora do início da execução...

@@ -2,3 +2,5 @@
 *__pycache__/
 /venv
 *__init__.py
+dist/*
+*.json

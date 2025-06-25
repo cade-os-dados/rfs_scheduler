@@ -1,12 +1,9 @@
 # use the command bellow in the root of project
 # python -m unittest discover tests
 
-import os, sys, unittest
-sys.path.append(os.path.abspath('./src'))
-
-from datetime import datetime
-from scheduler import Scheduler
-from projtypes import ProcessPipeline, LightProcess
+import os, unittest
+from pyagenda3.scheduler import Scheduler
+from pyagenda3.types import ProcessPipeline, LightProcess
 from unittest.mock import MagicMock
 
 class TestPipeline(unittest.TestCase):
@@ -22,9 +19,9 @@ class TestPipeline(unittest.TestCase):
         testdir = os.path.join(self.cdir, 'integration/scripts/pipe')
         join = lambda path: os.path.join(testdir, path)
         pipe = [
-            LightProcess([self.python, join('add.py'), 'number2.txt'], 'add'),
-            LightProcess([self.python, join('subtract.py'), 'number2.txt'], 'sub'),
-            LightProcess([self.python, join('assertion.py'), 'number2.txt'], 'assertion')
+            LightProcess([self.python, join('add.py'), 'number2.txt'], 1),
+            LightProcess([self.python, join('subtract.py'), 'number2.txt'], 2),
+            LightProcess([self.python, join('assertion.py'), 'number2.txt'], 3)
         ]
         scheduler = Scheduler()
         scheduler.add_process(ProcessPipeline(pipe))

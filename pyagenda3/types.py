@@ -3,20 +3,17 @@ from datetime import datetime, timedelta
 import subprocess
 import calendar
 
-try:
-    from src.timeops import scheduleOperations as sops
-except:
-    from timeops import scheduleOperations as sops
+from pyagenda3 import timeops
 
 @dataclass
 class ProcessOnce:
     args: list
-    name: str
+    id: int
     schedule: datetime
 
     def __eq__(self, other):
         eq = 0
-        attrs = ['args', 'name', 'schedule']
+        attrs = ['args', 'id', 'schedule']
         for attr in attrs:
             eqattr: bool = getattr(self, attr) == getattr(other, attr)
             eq += eqattr
@@ -52,39 +49,40 @@ class TwiceMonthProcess(ProcessOnce):
 @dataclass
 class Process:
     args: list
-    name: str
+    cwd: str
+    id: int
     schedule: datetime
     interval: int
 
     def __eq__(self, other):
         eq = 0
-        attrs = ['args', 'name', 'schedule', 'interval']
+        attrs = ['args', 'id', 'schedule', 'interval']
         for attr in attrs:
             eqattr: bool = getattr(self, attr) == getattr(other, attr)
             eq += eqattr
         return eq == len(attrs)
     
     def run(self, database, **kwargs):
-        id = database.commit_process(self.name, self.schedule)
-        result = subprocess.run(self.args, capture_output=True, text=True, **kwargs)
+        id = database.commit_process(self.id, self.schedule)
+        result = subprocess.run(self.args, capture_output=True, text=True, cwd=self.cwd, **kwargs)
         status = database.check_status(result)
-        database.update_commit(datetime.now(), status, result.stderr, id)
+        database.update_process_status(self.id, datetime.now(), status, result.stderr, id)
 
     def stop(self):
-        return False
+        return False if self.interval > 0 else True
 
     def next(self):
         if self.interval > 0:
             new_schedule = self.schedule
             while new_schedule < datetime.now():
-                new_schedule = sops.calculate_next_period(new_schedule, self.interval)
+                new_schedule = timeops.calculate_next_period(new_schedule, self.interval)
             self.schedule = new_schedule
             return self
 
 @dataclass
 class LightProcess:
     args: list
-    name: str
+    id: int
 
 class ProcessPipeline:
 
@@ -96,10 +94,10 @@ class ProcessPipeline:
     
     def run(self, database):
         for process in self.pipe:
-            id = database.commit_process(process.name, self.schedule)
+            id = database.commit_process(process.id, self.schedule)
             result = subprocess.run(process.args, capture_output=True, text=True, timeout=self.timeout)
             status = database.check_status(result)
-            database.update_commit(datetime.now(), status, result.stderr, id)
+            database.update_process_status(process.id, datetime.now(), status, result.stderr, id)
 
     def stop(self):
         return not self.interval > 0
@@ -108,7 +106,7 @@ class ProcessPipeline:
         if self.interval > 0:
             new_schedule = self.schedule
             while new_schedule < datetime.now():
-                new_schedule = sops.calculate_next_period(new_schedule, self.interval)
+                new_schedule = timeops.calculate_next_period(new_schedule, self.interval)
             self.schedule = new_schedule
             return self
 
@@ -126,3 +124,38 @@ class ProcessQueue:
     def append(self, process):
         self.processes.append(process)
         self.processes.sort(key=self.__time__)
+
+
+@dataclass
+class InstantaneousProcess:
+    args: list
+    cwd: str
+    id: int
+    schedule: datetime
+    interval: int
+
+    def __eq__(self, other):
+        eq = 0
+        attrs = ['args', 'id', 'schedule', 'interval']
+        for attr in attrs:
+            eqattr: bool = getattr(self, attr) == getattr(other, attr)
+            eq += eqattr
+        return eq == len(attrs)
+    
+    def run(self, database, **kwargs):
+        id = database.get_execution_id_from_waiting_process(self.id)
+        database.update_process_status(self.id, datetime.now(), 'RUNNING', '', id)
+        result = subprocess.run(self.args, capture_output=True, text=True, cwd=self.cwd, **kwargs)
+        status = database.check_status(result)
+        database.update_process_status(self.id, datetime.now(), status, result.stderr, id)
+
+    def stop(self):
+        return False if self.interval > 0 else True
+
+    def next(self):
+        if self.interval > 0:
+            new_schedule = self.schedule
+            while new_schedule < datetime.now():
+                new_schedule = timeops.calculate_next_period(new_schedule, self.interval)
+            self.schedule = new_schedule
+            return self
