@@ -1,3 +1,20 @@
+# Usage
+
+## Server
+```python
+from pyagenda3.scheduler import InfinityScheduler
+
+sc = InfinityScheduler()
+sc.mainloop()
+```
+## Client
+```python
+from pyagenda3.gui.main import App
+
+app = App()
+app.mainloop()
+```
+
 # Features para Implementar
 
 # Ideias Futuras
