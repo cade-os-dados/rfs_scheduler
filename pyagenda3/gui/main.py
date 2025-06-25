@@ -10,7 +10,7 @@ from pyagenda3.utils import relpath
 from pyagenda3.gui.forms import NewEditProcessForm
 from pyagenda3.database.ops import schedulerDatabase
 from pyagenda3.gui.features.centralize import centralize_dimensions
-from pyagenda3.gui.historico import abrir_historico, status_to_emoji
+from pyagenda3.gui.historico import abrir_historico, status_to_emoji, HistoricoGeral
 from pyagenda3.gui.features.treeview_refresh import TreeViewRefresher
 from pyagenda3.gui.import_export_manager import ImportExportManager
 
@@ -98,16 +98,28 @@ class App(tk.Tk):
         self.atualiza_processos()
                 
         self.taskbar_icon()
+
+        # tabs
+        tabControl = ttk.Notebook(self)
+
+        self.tab2 = tk.Frame(tabControl)
+        tk.Label(self.tab2,text="Histórico de Processos",font=self.mainfont,pady=10).pack()
+        self.tab2.pack()
+
         self.mainframe = tk.Frame(self)
         self.mainframe.pack()
 
+        tabControl.add(self.mainframe, text ='Processos')
+        tabControl.add(self.tab2, text ='Histórico de Execução')
+        tabControl.pack(fill='both',expand=True)
+        
         self.frame2_title = tk.Frame(self.mainframe)
-        self.frame2_title.grid(row=0,column=0)
+        self.frame2_title.pack()
         tk.Label(self.frame2_title, text='Listagem de Processos', font=self.mainfont,pady=10).pack()
 
         # front
         self.frame2 = tk.Frame(self.mainframe)
-        self.frame2.grid(row=1,column=0,pady=10)
+        self.frame2.pack()
 
         # button
         manager=ImportExportManager()
@@ -130,6 +142,9 @@ class App(tk.Tk):
         refresh = TreeViewRefresher(self.arvore, 300)
         refresh.run(lambda: self.atualiza_processos())
         self.refresh_color()
+
+        historico_geral = HistoricoGeral(self)
+        historico_geral.run(self.tab2)
 
     def taskbar_icon(self):
         import ctypes
@@ -324,7 +339,7 @@ class App(tk.Tk):
         for linha in self.processes:
             self.arvore.insert("", "end", values=linha)
     
-        self.arvore.pack(expand=True, fill=tk.Y)
+        self.arvore.pack(expand=True, fill='both')
         self.arvore.bind('<<TreeviewSelect>>', self.on_treeview_select)
         self.arvore.bind('<Button-3>', self.popup_right_click)
 

@@ -52,8 +52,8 @@ def teste_conexao(self):
 def show_servers(self):
     self.frame3 = tk.Frame(self.mainframe)
     self.frame4 = tk.Frame(self.mainframe)
-    self.frame3.grid(row=2,column=0)
-    self.frame4.grid(row=3,column=0)
+    self.frame3.pack()
+    self.frame4.pack()
     tk.Label(self.frame3, text='Servidores',font=self.mainfont).pack()
 
 
