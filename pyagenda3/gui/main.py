@@ -12,6 +12,7 @@ from pyagenda3.database.ops import schedulerDatabase
 from pyagenda3.gui.features.centralize import centralize_dimensions
 from pyagenda3.gui.historico import abrir_historico, status_to_emoji
 from pyagenda3.gui.features.treeview_refresh import TreeViewRefresher
+from pyagenda3.gui.import_export_manager import ImportExportManager
 
 DELAY_ATUALIZACAO = 50 # ms
 DEBUG = False; PRINT = False;
@@ -102,11 +103,21 @@ class App(tk.Tk):
 
         self.frame2_title = tk.Frame(self.mainframe)
         self.frame2_title.grid(row=0,column=0)
-        tk.Label(self.frame2_title, text='Listagem de Processos', font=self.mainfont,pady=20).pack()
+        tk.Label(self.frame2_title, text='Listagem de Processos', font=self.mainfont,pady=10).pack()
 
+        # front
         self.frame2 = tk.Frame(self.mainframe)
-        self.frame2.grid(row=1,column=0)
-        self.make_treeview(self.frame2)
+        self.frame2.grid(row=1,column=0,pady=10)
+
+        # button
+        manager=ImportExportManager()
+        self.subframe = tk.Frame(self.frame2); self.subframe.pack(pady=5,anchor='w');
+        tk.Button(self.subframe,text='Importar',command=lambda: manager.importar(self)).pack(side=tk.LEFT)
+        tk.Button(self.subframe,text='Exportar',command=lambda: manager.export(self)).pack(side=tk.LEFT)
+
+        # treeview
+        self.subframe2 = tk.Frame(self.frame2); self.subframe2.pack()
+        self.make_treeview(self.subframe2)
 
         self.show_servers()
         self.spawn_rcmenu()
