@@ -83,7 +83,7 @@ def get_sizes(root):
 
 class App(tk.Tk):
 
-    def __init__(self):
+    def __init__(self,path='scheduler.db'):
         super().__init__()
         self.title("Processos")
         # geometria
@@ -93,7 +93,7 @@ class App(tk.Tk):
         self.geometry(f"{w_}x{h_}+{pos[0]}+{pos[1]}")
         # fonte
         self.mainfont = font.Font(family='Helvetica',size=14, weight='bold')
-        self.db = schedulerDatabase('scheduler.db')
+        self.db = schedulerDatabase(path)
         self.db.setup_last_status()
         self.atualiza_processos()
                 
