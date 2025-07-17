@@ -41,7 +41,8 @@ def teste_conexao(self):
         messagebox.showerror('Erro', 'Não foi possível estabelecer conexão!')
         new_window.destroy()
 
-    ping = PingClient('scheduler.db')
+    # ping = PingClient('scheduler.db')
+    ping = PingClient(self.db.filename)
     # server = self.servers[0].cget('text')
     server = self.chosen_server.get()
     ping.ping(server)
